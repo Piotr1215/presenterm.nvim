@@ -21,11 +21,13 @@ A Neovim plugin for creating and managing presenterm
 for slide navigation, partials management, and live preview.
 
 
+
 FEATURES                            *presenterm.nvim-presenterm.nvim-features*
 
 - **Slide Management**: Navigate, create, delete, reorder slides with ease
 - **Partial Support**: Include reusable content from partial files with smart title detection
-- **Telescope Integration**: Browse slides and partials with preview
+- **Telescope Integration**: Browse slides and partials with preview, slides with partials marked with [P]
+- **Interactive Reordering**: Reorder slides with dd/p vim motions, shows proper titles from partials
 - **Code Execution**: Toggle and run executable code blocks
 - **Live Preview**: Launch presenterm preview in terminal
 - **Statistics**: View presentation stats and time estimates
@@ -137,13 +139,20 @@ EXAMPLE KEYBINDINGS ~
 
 TELESCOPE INTEGRATION  *presenterm.nvim-presenterm.nvim-telescope-integration*
 
-The telescope picker for slides shows titles extracted from slides, including
-titles from partial files:
+
+SLIDE PICKER ~
+
+The slide picker shows all slides with titles extracted from the content,
+including from partial files. Slides containing partials are marked with `[P]`
+indicator.
 
 - `<CR>` - Jump to selected slide
-- `<C-e>` - Edit partial if cursor is on an include line
+- `<C-e>` - Edit the first partial in the selected slide (if it contains any)
 
-The telescope picker for partials has two modes:
+
+PARTIAL PICKER ~
+
+The partial picker has two modes:
 
 - **Include mode** (`:PresenterPartial include`):
     - `<CR>` - Insert include directive
