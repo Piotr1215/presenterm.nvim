@@ -8,7 +8,7 @@ A Neovim plugin for creating and managing [presenterm](https://github.com/mfonta
 [![Lua](https://img.shields.io/badge/Lua-5.1+-blue.svg?style=flat-square&logo=lua)](https://www.lua.org)
 [![CI](https://github.com/Piotr1215/presenterm.nvim/actions/workflows/test.yml/badge.svg)](https://github.com/Piotr1215/presenterm.nvim/actions/workflows/test.yml)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-[![LuaRocks](https://img.shields.io/luarocks/v/Piotr1215/presenterm.nvim?logo=lua&color=purple&style=flat-square)](https://luarocks.org/modules/Piotr1215/presenterm.nvim)
+[![LuaRocks](https://img.shields.io/luarocks/v/Piotr1215/presenterm.nvim?logo=lua&color=purple&style=flat-square)](https://luarocks.org/modules/piotr1215/presenterm.nvim)
 
 </div>
 
