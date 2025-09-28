@@ -2,11 +2,22 @@
 
 A Neovim plugin for creating and managing [presenterm](https://github.com/mfontanini/presenterm) presentations with enhanced support for slide navigation, partials management, and live preview.
 
+<div align="center">
+
+[![Neovim](https://img.shields.io/badge/Neovim-0.9+-green.svg?style=flat-square&logo=neovim)](https://neovim.io)
+[![Lua](https://img.shields.io/badge/Lua-5.1+-blue.svg?style=flat-square&logo=lua)](https://www.lua.org)
+[![CI](https://github.com/Piotr1215/presenterm.nvim/actions/workflows/test.yml/badge.svg)](https://github.com/Piotr1215/presenterm.nvim/actions/workflows/test.yml)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+[![LuaRocks](https://img.shields.io/luarocks/v/Piotr1215/presenterm.nvim?logo=lua&color=purple&style=flat-square)](https://luarocks.org/modules/Piotr1215/presenterm.nvim)
+
+</div>
+
 ## Features
 
 - **Slide Management**: Navigate, create, delete, reorder slides with ease
 - **Partial Support**: Include reusable content from partial files with smart title detection
-- **Telescope Integration**: Browse slides and partials with preview
+- **Telescope Integration**: Browse slides and partials with preview, slides with partials marked with [P]
+- **Interactive Reordering**: Reorder slides with dd/p vim motions, shows proper titles from partials
 - **Code Execution**: Toggle and run executable code blocks
 - **Live Preview**: Launch presenterm preview in terminal
 - **Statistics**: View presentation stats and time estimates
@@ -100,12 +111,16 @@ vim.keymap.set("n", "<leader>sc", ":PresenterStats<cr>", { desc = "Show stats" }
 
 ## Telescope Integration
 
-The telescope picker for slides shows titles extracted from slides, including titles from partial files:
+### Slide Picker
+
+The slide picker shows all slides with titles extracted from the content, including from partial files. Slides containing partials are marked with `[P]` indicator.
 
 - `<CR>` - Jump to selected slide
-- `<C-e>` - Edit partial if cursor is on an include line
+- `<C-e>` - Edit the first partial in the selected slide (if it contains any)
 
-The telescope picker for partials has two modes:
+### Partial Picker
+
+The partial picker has two modes:
 
 - **Include mode** (`:PresenterPartial include`):
   - `<CR>` - Insert include directive

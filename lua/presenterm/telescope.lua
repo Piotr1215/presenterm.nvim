@@ -2,6 +2,7 @@ local M = {}
 
 local navigation = require('presenterm.navigation')
 local partials = require('presenterm.partials')
+local slides = require('presenterm.slides')
 
 ---Telescope slide picker
 ---@param opts table|nil Options
@@ -19,17 +20,24 @@ function M.slide_picker(opts)
   local actions = require('telescope.actions')
   local action_state = require('telescope.actions.state')
 
-  local slides = navigation.get_slide_titles()
+  local slide_list = navigation.get_slide_titles()
+
+  -- Reverse the slide list so first slide appears at top
+  local reversed_slides = {}
+  for i = #slide_list, 1, -1 do
+    table.insert(reversed_slides, slide_list[i])
+  end
 
   pickers
     .new(opts, {
-      prompt_title = 'Presenterm Slides',
+      prompt_title = 'Presenterm Slides (C-e: edit partial)',
       finder = finders.new_table({
-        results = slides,
+        results = reversed_slides,
         entry_maker = function(entry)
+          local indicator = entry.has_partial and ' [P]' or ''
           return {
             value = entry,
-            display = string.format('%2d. %s', entry.index, entry.title),
+            display = string.format('%2d. %s%s', entry.index, entry.title, indicator),
             ordinal = entry.index .. ' ' .. entry.title .. ' ' .. entry.preview,
           }
         end,
@@ -44,20 +52,30 @@ function M.slide_picker(opts)
           end
         end)
 
-        -- Add mapping to edit partial if on a partial include line
+        -- Add mapping to edit partial if slide contains partials
         map('i', '<C-e>', function()
           actions.close(prompt_bufnr)
           local selection = action_state.get_selected_entry()
           if selection then
             -- Go to the slide first
             require('presenterm.navigation').go_to_slide(selection.value.index)
-            -- Check if current line is a partial include
+            -- Find and open first partial in this slide
             vim.schedule(function()
-              if partials.is_partial_include() then
-                partials.open_partial_at_cursor()
-              else
-                vim.notify('Not on a partial include line', vim.log.levels.INFO)
+              local positions = slides.get_slide_positions()
+              local start_line = positions[selection.value.index] + 1
+              local end_line = positions[selection.value.index + 1] - 1
+
+              -- Search for partial includes in the slide
+              local lines = vim.api.nvim_buf_get_lines(0, start_line - 1, end_line, false)
+              for i, line in ipairs(lines) do
+                if line:match('<!%-%- include: (.+) %-%->') then
+                  -- Move cursor to the partial include line
+                  vim.fn.cursor(start_line + i - 1, 1)
+                  partials.open_partial_at_cursor()
+                  return
+                end
               end
+              vim.notify('No partial includes in this slide', vim.log.levels.INFO)
             end)
           end
         end)
@@ -96,7 +114,8 @@ function M.partial_picker(opts)
 
   pickers
     .new(opts, {
-      prompt_title = edit_mode and 'Edit Partial' or 'Include Partial',
+      prompt_title = edit_mode and 'Edit Partial (C-i: insert include)'
+        or 'Include Partial (C-e: edit file)',
       finder = finders.new_table({
         results = partial_files,
         entry_maker = function(entry)
@@ -111,7 +130,7 @@ function M.partial_picker(opts)
       sorter = conf.generic_sorter(opts),
       previewer = previewers.new_buffer_previewer({
         title = 'Partial Content',
-        define_preview = function(self, entry, status)
+        define_preview = function(self, entry, _)
           local content = vim.fn.readfile(entry.value.path)
           vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, content)
           vim.bo[self.state.bufnr].filetype = 'markdown'

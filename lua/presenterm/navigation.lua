@@ -21,15 +21,17 @@ function M.go_to_slide(slide_num)
     target_line = vim.fn.line('$')
   end
 
-  -- Look for a header in the first few lines of the slide
+  -- Skip empty lines and find first content line
   local lines = vim.api.nvim_buf_get_lines(
     0,
     target_line - 1,
     math.min(target_line + 10, vim.fn.line('$')),
     false
   )
+
+  -- Find first non-empty line (could be header, partial include, or content)
   for i, line in ipairs(lines) do
-    if line:match('^#+ ') or (i < #lines and lines[i + 1]:match('^=+$')) then
+    if line:match('%S') then -- If line has non-whitespace content
       target_line = target_line + i - 1
       break
     end
@@ -175,10 +177,20 @@ function M.get_slide_titles()
     local title, preview_lines = process_slide_content(lines, start_line, end_line)
     title = title or string.format('Slide %d', i)
 
+    -- Check if slide contains partials
+    local has_partial = false
+    for j = start_line, end_line - 1 do
+      if j <= #lines and lines[j]:match('<!%-%- include: .+ %-%->') then
+        has_partial = true
+        break
+      end
+    end
+
     table.insert(slide_list, {
       index = i,
       title = title,
       start_line = start_line,
+      has_partial = has_partial,
       preview = table.concat(preview_lines, ' '):sub(1, 80) .. '...',
     })
   end

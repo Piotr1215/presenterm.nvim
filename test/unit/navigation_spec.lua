@@ -151,5 +151,106 @@ describe('navigation', function()
         assert.truthy(titles[1].title:match('Slide %d'))
       end
     end)
+
+    it('should mark slides containing partials', function()
+      -- Clear and reload modules with proper mocks
+      package.loaded['presenterm.navigation'] = nil
+      package.loaded['presenterm.slides'] = nil
+
+      -- Mock slides module before loading navigation
+      package.loaded['presenterm.slides'] = {
+        get_slide_positions = function()
+          return { 0, 3, 8, 14 } -- positions for 3 slides
+        end,
+        is_presentation = function()
+          return true
+        end,
+      }
+
+      local nav = require('presenterm.navigation')
+
+      vim.api.nvim_buf_get_lines = function()
+        return {
+          '# Slide 1',
+          'Content without partial',
+          '<!-- end_slide -->',
+          '',
+          '# Slide 2',
+          '<!-- include: _partials/intro.md -->',
+          'Content with partial',
+          '<!-- end_slide -->',
+          '',
+          '# Slide 3',
+          'More content',
+          '<!-- include: _partials/demo.md -->',
+          '<!-- include: _partials/outro.md -->',
+          '<!-- end_slide -->',
+        }
+      end
+
+      local titles = nav.get_slide_titles()
+      assert.is_table(titles)
+      assert.equals(3, #titles)
+
+      -- First slide has no partial
+      assert.equals(1, titles[1].index)
+      assert.equals('Slide 1', titles[1].title)
+      assert.is_false(titles[1].has_partial)
+
+      -- Second slide has one partial
+      assert.equals(2, titles[2].index)
+      assert.equals('Slide 2', titles[2].title)
+      assert.is_true(titles[2].has_partial)
+
+      -- Third slide has multiple partials
+      assert.equals(3, titles[3].index)
+      assert.equals('Slide 3', titles[3].title)
+      assert.is_true(titles[3].has_partial)
+    end)
+
+    it('should handle malformed partial includes correctly', function()
+      -- Clear and reload modules with proper mocks
+      package.loaded['presenterm.navigation'] = nil
+      package.loaded['presenterm.slides'] = nil
+
+      -- Mock slides module before loading navigation
+      package.loaded['presenterm.slides'] = {
+        get_slide_positions = function()
+          return { 0, 3, 7, 11 } -- positions for 3 slides
+        end,
+        is_presentation = function()
+          return true
+        end,
+      }
+
+      local nav = require('presenterm.navigation')
+
+      vim.api.nvim_buf_get_lines = function()
+        return {
+          '# Slide 1',
+          '<!-- include: -->', -- Empty path
+          '<!-- end_slide -->',
+          '',
+          '# Slide 2',
+          '<!-- include _partials/intro.md -->', -- Missing colon
+          '<!-- end_slide -->',
+          '',
+          '# Slide 3',
+          '<!-- include: _partials/valid.md -->', -- Valid
+          '<!-- end_slide -->',
+        }
+      end
+
+      local titles = nav.get_slide_titles()
+      assert.is_table(titles)
+      assert.equals(3, #titles)
+
+      -- First and second slides have malformed includes (not detected as partials)
+      assert.is_false(titles[1].has_partial)
+      assert.is_false(titles[2].has_partial)
+
+      -- Third slide has valid partial
+      assert.is_true(titles[3].has_partial)
+    end)
   end)
 end)

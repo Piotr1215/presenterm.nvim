@@ -359,17 +359,20 @@ function M.interactive_reorder()
   local frontmatter_end = M.get_frontmatter_end()
   local cfg = config.get()
 
-  -- Get all slides content
+  -- Get all slides content with titles from partials
+  local navigation = require('presenterm.navigation')
+  local slide_titles = navigation.get_slide_titles()
+
   for i = 1, #positions - 1 do
     local slide_content = M.get_slide_content(i, positions, false)
-    local title = string.format('Slide %d', i)
 
-    -- Find title in slide content
-    for _, line in ipairs(slide_content) do
-      if line:match('^#+ ') then
-        title = line:gsub('^#+ ', '')
-        break
-      end
+    -- Use the title from navigation (which handles partials)
+    local title = slide_titles[i] and slide_titles[i].title or string.format('Slide %d', i)
+    local has_partial = slide_titles[i] and slide_titles[i].has_partial or false
+
+    -- Add [P] indicator if slide has partials
+    if has_partial then
+      title = title .. ' [P]'
     end
 
     table.insert(slides, {
