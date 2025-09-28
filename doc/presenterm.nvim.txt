@@ -1,0 +1,21 @@
+*presenterm.nvim.txt*    Neovim plugin for creating and managing presenterm presentations
+
+==============================================================================
+CONTENTS                                           *presenterm.nvim-contents*
+
+    1. Introduction ........................... |presenterm.nvim-introduction|
+    2. Installation ........................... |presenterm.nvim-installation|
+    3. Configuration .......................... |presenterm.nvim-configuration|
+    4. Commands ............................... |presenterm.nvim-commands|
+    5. Keymaps ................................ |presenterm.nvim-keymaps|
+
+==============================================================================
+INTRODUCTION                                   *presenterm.nvim-introduction*
+
+presenterm.nvim is a Neovim plugin for creating and managing presenterm
+presentations with enhanced support for slide navigation, partials management,
+and live preview.
+
+==============================================================================
+
+vim:tw=78:ts=8:ft=help:norl:

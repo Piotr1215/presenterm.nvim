@@ -1,0 +1,23 @@
+# Lua
+*.luac
+
+# Test artifacts
+.luacov*
+luacov.stats.out
+luacov.report.out
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Dependencies
+/lua_modules/
+/node_modules/
+
+# Build artifacts
+/build/
+/dist/
