@@ -35,7 +35,8 @@ FEATURES                            *presenterm.nvim-presenterm.nvim-features*
 
 INSTALLATION                    *presenterm.nvim-presenterm.nvim-installation*
 
-Using lazy.nvim <https://github.com/folke/lazy.nvim>:
+
+LAZY.NVIM ~
 
 >lua
     {
@@ -44,7 +45,6 @@ Using lazy.nvim <https://github.com/folke/lazy.nvim>:
         "nvim-telescope/telescope.nvim", -- Optional, for telescope integration
       },
       config = function()
-        -- Optional: override default configuration
         require("presenterm").setup({
           slide_marker = "<!-- end_slide -->",
           partials = {
@@ -57,6 +57,20 @@ Using lazy.nvim <https://github.com/folke/lazy.nvim>:
         })
       end,
     }
+<
+
+
+ROCKS.NVIM ~
+
+>vim
+    :Rocks install presenterm.nvim
+<
+
+
+LUAROCKS ~
+
+>bash
+    luarocks install presenterm.nvim
 <
 
 
