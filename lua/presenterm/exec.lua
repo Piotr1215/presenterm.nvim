@@ -1,6 +1,60 @@
 local M = {}
 
----Toggle +exec flag on code block
+---Determine the next state in the toggle cycle
+---@param code_fence string The code fence line
+---@return string The next state in the cycle
+local function get_next_exec_state(code_fence)
+  -- Preserve +id: and custom executors (e.g., +exec:rust-script)
+  local has_id = code_fence:match('%+id:')
+  local custom_executor = code_fence:match('%+exec:(%S+)')
+
+  -- If has +id: or custom executor, never return to plain
+  local can_return_to_plain = not (has_id or custom_executor)
+
+  -- Detect current state
+  local has_exec = code_fence:match('%+exec')
+  local has_exec_replace = code_fence:match('%+exec_replace')
+  local has_acquire_terminal = code_fence:match('%+acquire_terminal')
+
+  if has_exec_replace then
+    -- State: +exec_replace -> +exec +acquire_terminal
+    -- Remove +exec_replace, add +exec and +acquire_terminal
+    local new_fence = code_fence:gsub(' %+exec_replace', ' +exec +acquire_terminal')
+    return new_fence
+  elseif has_exec and has_acquire_terminal then
+    -- State: +exec +acquire_terminal -> plain (or +exec if can't return to plain)
+    if can_return_to_plain then
+      -- Remove all exec-related flags
+      local new_fence = code_fence
+      new_fence = new_fence:gsub(' %+exec[^%s]*', '')
+      new_fence = new_fence:gsub(' %+acquire_terminal', '')
+      return new_fence
+    else
+      -- Cycle back to +exec (preserving +id: or custom executor)
+      local new_fence = code_fence:gsub(' %+acquire_terminal', '')
+      return new_fence
+    end
+  elseif has_exec then
+    -- State: +exec (or +exec:custom) -> +exec_replace
+    -- For custom executors, we can't use +exec_replace, so cycle to +exec +acquire_terminal
+    if custom_executor then
+      -- Custom executors don't support +exec_replace, go directly to +exec +acquire_terminal
+      local new_fence = code_fence .. ' +acquire_terminal'
+      return new_fence
+    else
+      -- Regular +exec -> +exec_replace
+      local new_fence = code_fence:gsub(' %+exec', ' +exec_replace')
+      return new_fence
+    end
+  else
+    -- State: plain -> +exec
+    return code_fence .. ' +exec'
+  end
+end
+
+---Toggle +exec flag on code block following the cycle:
+---plain -> +exec -> +exec_replace -> +exec +acquire_terminal -> plain
+---If +id: or custom executor is present, cycle stays within exec states
 function M.toggle_exec()
   local cursor_line = vim.fn.line('.')
   local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
@@ -11,7 +65,7 @@ function M.toggle_exec()
 
   -- Search backwards for code block start
   for i = cursor_line, 1, -1 do
-    if lines[i]:match('^```') then
+    if lines[i] and lines[i]:match('^```') then
       start_line = i
       break
     end
@@ -25,7 +79,7 @@ function M.toggle_exec()
 
   -- Search forwards for code block end
   for i = cursor_line, #lines do
-    if i > start_line and lines[i]:match('^```') then
+    if i > start_line and lines[i] and lines[i]:match('^```') then
       end_line = i
       break
     end
@@ -37,21 +91,11 @@ function M.toggle_exec()
     return
   end
 
-  -- Now we know we're inside a code block, toggle the +exec flag
+  -- Get the next state
   local code_fence = lines[start_line]
-  if code_fence:match('%+exec') then
-    -- Remove +exec flags
-    code_fence = code_fence:gsub(' %+exec%w*', '')
-  else
-    -- Add +exec flag
-    code_fence = code_fence .. ' +exec'
-  end
+  local new_fence = get_next_exec_state(code_fence)
 
-  vim.fn.setline(start_line, code_fence)
-  vim.notify(
-    code_fence:match('%+exec') and 'Added +exec flag' or 'Removed +exec flag',
-    vim.log.levels.INFO
-  )
+  vim.fn.setline(start_line, new_fence)
 end
 
 ---Run current code block (if it has +exec)

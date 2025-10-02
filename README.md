@@ -76,7 +76,7 @@ The plugin provides user commands instead of default keymappings, following Neov
 - `:PresenterPartial list` - List all partials
 
 #### Code Blocks
-- `:PresenterExec toggle` - Toggle +exec flag on code block
+- `:PresenterExec toggle` - Toggle code execution flags (plain → +exec → +exec_replace → +exec +acquire_terminal)
 - `:PresenterExec run` - Run current code block
 
 #### Preview
