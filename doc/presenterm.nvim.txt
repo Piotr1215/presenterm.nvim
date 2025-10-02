@@ -98,7 +98,7 @@ PARTIALS
 
 CODE BLOCKS
 
-- `:PresenterExec toggle` - Toggle +exec flag on code block
+- `:PresenterExec toggle` - Toggle code execution flags (plain → +exec → +exec_replace → +exec +acquire_terminal)
 - `:PresenterExec run` - Run current code block
 
 
