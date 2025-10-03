@@ -71,66 +71,9 @@ function M.insert_layout(layout_array, bufnr)
   vim.api.nvim_win_set_cursor(0, { current_line + 4, 0 })
 end
 
----Launch telescope picker for layout selection
+---Launch picker for layout selection
 function M.layout_picker()
-  -- Check if telescope is available
-  local has_telescope = pcall(require, 'telescope')
-  if not has_telescope then
-    vim.notify('Telescope is required for layout picker', vim.log.levels.ERROR)
-    return
-  end
-
-  local pickers = require('telescope.pickers')
-  local finders = require('telescope.finders')
-  local conf = require('telescope.config').values
-  local actions = require('telescope.actions')
-  local action_state = require('telescope.actions.state')
-
-  local templates = M.get_templates()
-
-  -- Convert templates to picker entries
-  local entries = {}
-  for key, template in pairs(templates) do
-    table.insert(entries, {
-      value = template,
-      display = template.name,
-      ordinal = template.name,
-      layout_key = key,
-    })
-  end
-
-  -- Sort by name
-  table.sort(entries, function(a, b)
-    return a.display < b.display
-  end)
-
-  pickers
-    .new({}, {
-      prompt_title = 'Select Column Layout',
-      finder = finders.new_table({
-        results = entries,
-        entry_maker = function(entry)
-          return {
-            value = entry.value,
-            display = entry.display,
-            ordinal = entry.ordinal,
-          }
-        end,
-      }),
-      sorter = conf.generic_sorter({}),
-      attach_mappings = function(prompt_bufnr, _)
-        actions.select_default:replace(function()
-          local selection = action_state.get_selected_entry()
-          actions.close(prompt_bufnr)
-
-          if selection then
-            M.insert_layout(selection.value.dimensions)
-          end
-        end)
-        return true
-      end,
-    })
-    :find()
+  require('presenterm.pickers').layout_picker()
 end
 
 return M

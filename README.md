@@ -14,9 +14,8 @@ A Neovim plugin for creating and managing [presenterm](https://github.com/mfonta
 
 ## Features
 
-- **Slide Management**      : Navigate, create, delete, reorder slides with ease using vim motions or telescope picker
+- **Slide Management**      : Navigate, create, delete, reorder slides with ease using vim motions
 - **Partial Support**       : Include reusable content from partial files, useful when working with multiple presentations
-- **Telescope Integration** : Browse slides and partials with preview, slides with partials marked with [P]
 - **Interactive Reordering**: Reorder slides interactively using vim line movements
 - **Code Execution**        : Toggle `presenterm` code execution markers (`+exec`, `+exec_replace` etc)
 - **Execute Code Blocks**   : Run code blocks directly from Neovim
@@ -32,26 +31,37 @@ A Neovim plugin for creating and managing [presenterm](https://github.com/mfonta
 ```lua
 {
   "Piotr1215/presenterm.nvim",
-  dependencies = {
-    "nvim-telescope/telescope.nvim", -- Optional, for telescope integration
-  },
-  opts = {},  -- Uses all defaults
+  opts = {},  -- Uses all defaults, auto-detects picker
 }
 ```
 
-**Custom setup (for presentations with executable commands):**
+**With optional picker (one of telescope/fzf-lua/snacks):**
 ```lua
 {
   "Piotr1215/presenterm.nvim",
   dependencies = {
-    "nvim-telescope/telescope.nvim", -- Optional, for telescope integration
+    -- Choose one (or install separately):
+    "nvim-telescope/telescope.nvim", -- Option 1: Telescope
+    -- "ibhagwan/fzf-lua",            -- Option 2: fzf-lua
+    -- "folke/snacks.nvim",           -- Option 3: Snacks
   },
+  opts = {},
+}
+```
+
+**Custom setup with picker preference:**
+```lua
+{
+  "Piotr1215/presenterm.nvim",
   config = function()
     require("presenterm").setup({
-      default_keybindings = true,           -- Enable default keymaps
+      default_keybindings = true,
+      picker = {
+        provider = "telescope",  -- Options: "telescope", "fzf", "snacks", "builtin"
+      },
       preview = {
-        command = "presenterm -xX",         -- Enable command execution
-        presentation_preview_sync = true,   -- Enable bi-directional sync
+        command = "presenterm -xX",
+        presentation_preview_sync = true,
       },
     })
   end,
@@ -111,9 +121,9 @@ vim.keymap.set("n", "[s", ":Presenterm prev<cr>")
 - `<leader>sv` - Select slide
 - `<leader>sk` / `<leader>sj` - Move slide up/down
 - `<leader>sR` - Reorder slides
-- `<leader>sl` - List slides (telescope)
-- `<leader>sL` - Select layout (telescope)
-- `<leader>sp` - Include partial (telescope)
+- `<leader>sl` - List slides
+- `<leader>sL` - Select layout
+- `<leader>sp` - Include partial
 - `<C-e>` - Toggle +exec
 - `<leader>sr` - Run code block
 - `<leader>sP` - Preview presentation
@@ -129,7 +139,7 @@ All commands use the `:Presenterm <command>` pattern for a clean namespace.
 - `:Presenterm next` - Go to next slide
 - `:Presenterm prev` - Go to previous slide
 - `:Presenterm goto N` - Go to slide N
-- `:Presenterm list` - List all slides with telescope
+- `:Presenterm list` - List all slides
 
 #### Slide Management
 - `:Presenterm new` - Create new slide after current
@@ -151,7 +161,7 @@ All commands use the `:Presenterm <command>` pattern for a clean namespace.
 - `:Presenterm exec run` - Run current code block
 
 #### Column Layouts
-- `:Presenterm layout` - Open telescope picker to select and insert column layout templates
+- `:Presenterm layout` - Open picker to select and insert column layout templates
 
 Available templates:
 - Two Column layouts: 50/50, 60/40, 70/30
@@ -188,7 +198,9 @@ When `presentation_preview_sync = true`, navigation is synchronized bi-direction
 - Presenterm footer is customized to hide slide numbers
 - Using custom footer configuration without "N / M" pattern
 
-## Telescope Integration
+## Picker and preview integrating
+
+Auto-detects available pickers (Telescope/fzf-lua/Snacks) or falls back to vim.ui.select
 
 ### Slide Picker
 
@@ -240,10 +252,8 @@ sections = {
     presentation_preview_sync = false,
     login_shell = true,                  -- Loads PATH, env vars, etc.
   },
-  telescope = {
-    theme = "dropdown",
-    layout_config = { width = 0.8, height = 0.6 },
-    enable_preview = true,
+  picker = {
+    provider = nil,  -- Auto-detect: telescope > fzf > snacks > builtin
   },
   on_attach = nil,
   default_keybindings = false,

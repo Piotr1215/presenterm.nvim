@@ -33,7 +33,7 @@ local subcommand_tbl = {
   },
   list = {
     impl = function(args, opts)
-      require('presenterm.telescope').slide_picker()
+      require('presenterm.pickers').slide_picker()
     end,
   },
   -- Slide management commands
@@ -82,11 +82,11 @@ local subcommand_tbl = {
     impl = function(args, opts)
       local subcommand = args[1]
       if subcommand == 'include' then
-        require('presenterm.telescope').partial_picker()
+        require('presenterm.pickers').partial_picker()
       elseif subcommand == 'edit' then
-        require('presenterm.telescope').partial_picker({ edit_mode = true })
+        require('presenterm.pickers').partial_picker({ edit_mode = true })
       elseif subcommand == 'list' then
-        require('presenterm.telescope').list_partials()
+        require('presenterm.pickers').partial_picker({ edit_mode = true })
       else
         vim.notify('Unknown partial subcommand. Use: include, edit, or list', vim.log.levels.ERROR)
       end

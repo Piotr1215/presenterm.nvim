@@ -71,15 +71,15 @@ function M.setup_default(bufnr)
     { buffer = bufnr, desc = 'Reorder slides' }
   )
 
-  -- Telescope integration
+  -- Picker integration
   vim.keymap.set('n', '<leader>sl', function()
-    require('presenterm.telescope').slide_picker()
+    require('presenterm.pickers').slide_picker()
   end, { buffer = bufnr, desc = 'List slides' })
   vim.keymap.set('n', '<leader>sL', function()
     require('presenterm.layout').layout_picker()
   end, { buffer = bufnr, desc = 'Select layout' })
   vim.keymap.set('n', '<leader>sp', function()
-    require('presenterm.telescope').partial_picker()
+    require('presenterm.pickers').partial_picker()
   end, { buffer = bufnr, desc = 'Include partial' })
 
   -- Code execution
