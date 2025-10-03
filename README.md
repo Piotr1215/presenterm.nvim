@@ -112,6 +112,7 @@ vim.keymap.set("n", "[s", ":Presenterm prev<cr>")
 - `<leader>sk` / `<leader>sj` - Move slide up/down
 - `<leader>sR` - Reorder slides
 - `<leader>sl` - List slides (telescope)
+- `<leader>sL` - Select layout (telescope)
 - `<leader>sp` - Include partial (telescope)
 - `<C-e>` - Toggle +exec
 - `<leader>sr` - Run code block
@@ -148,6 +149,17 @@ All commands use the `:Presenterm <command>` pattern for a clean namespace.
 #### Code Blocks
 - `:Presenterm exec toggle` - Toggle code execution flags (plain → +exec → +exec_replace → +exec +acquire_terminal)
 - `:Presenterm exec run` - Run current code block
+
+#### Column Layouts
+- `:Presenterm layout` - Open telescope picker to select and insert column layout templates
+
+Available templates:
+- Two Column layouts: 50/50, 60/40, 70/30
+- Three Column layouts: 33/33/33, 50/25/25
+- Sidebar layouts: 25/75 (left), 75/25 (right)
+- Centered content: 20/60/20
+
+Inserts full scaffolding with `<!-- column_layout: [x, y] -->`, column markers, and `<!-- reset_layout -->`.
 
 #### Preview
 - `:Presenterm preview` - Preview presentation in terminal split

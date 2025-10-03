@@ -155,6 +155,12 @@ local subcommand_tbl = {
       require('presenterm').show_help()
     end,
   },
+  -- Layout commands
+  layout = {
+    impl = function(args, opts)
+      require('presenterm.layout').layout_picker()
+    end,
+  },
 }
 
 ---@param opts table :h lua-guide-commands-create

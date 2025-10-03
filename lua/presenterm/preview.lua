@@ -47,12 +47,6 @@ local function parse_slide_from_terminal(buf)
       -- and starts numbering at 2, but in markdown it's slide 1
       if has_frontmatter() then
         slide_num = slide_num - 1
-        vim.notify(
-          'Parsed slide: ' .. (slide_num + 1) .. ' -> adjusted to ' .. slide_num .. ' (frontmatter)',
-          vim.log.levels.DEBUG
-        )
-      else
-        vim.notify('Parsed slide: ' .. slide_num .. ' (no frontmatter)', vim.log.levels.DEBUG)
       end
 
       return slide_num
@@ -256,47 +250,6 @@ function M.get_sync_state()
     last_buffer_slide = state.last_buffer_slide,
     is_syncing = state.is_syncing,
   }
-end
-
----Print terminal buffer lines with slide pattern detection
----@param lines table
-local function print_terminal_lines(lines)
-  print('\nLast 30 lines (cleaned):')
-  for i = math.max(1, #lines - 30), #lines do
-    local cleaned = lines[i]:gsub('\27%[[0-9;]*m', '')
-    if cleaned:match('%S') then
-      print(i .. ': ' .. cleaned)
-      local match = cleaned:match('(%d+)%s*/%s*%d+')
-      if match then
-        print('     ^^^ MATCHES SLIDE PATTERN: ' .. match)
-      end
-    end
-  end
-end
-
----Print debug summary
----@param slide_num number|nil
-local function print_debug_summary(slide_num)
-  print('\n=== RESULT ===')
-  print('Parsed slide number: ' .. (slide_num or 'nil'))
-  print('Has frontmatter: ' .. tostring(has_frontmatter()))
-  print('Sync enabled: ' .. tostring(state.sync_enabled))
-end
-
----Debug: Print terminal buffer content
-function M.debug_terminal_buffer()
-  if not state.terminal_buf or not vim.api.nvim_buf_is_valid(state.terminal_buf) then
-    vim.notify('No valid terminal buffer', vim.log.levels.ERROR)
-    return
-  end
-
-  local lines = vim.api.nvim_buf_get_lines(state.terminal_buf, 0, -1, false)
-  print('Terminal buffer has ' .. #lines .. ' lines')
-
-  print_terminal_lines(lines)
-
-  local slide_num = parse_slide_from_terminal(state.terminal_buf)
-  print_debug_summary(slide_num)
 end
 
 ---Count presentation content
