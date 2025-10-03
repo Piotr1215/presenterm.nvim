@@ -72,7 +72,7 @@ luarocks install presenterm.nvim
 
 ## Usage
 
-The plugin automatically detects `presenterm` presentations (by looking for slide markers like `<!-- end_slide -->` or frontmatter) and activates when you open a markdown file. You can also manually activate with `:PresenterActivate`.
+The plugin automatically detects `presenterm` presentations (by looking for slide markers like `<!-- end_slide -->` or frontmatter) and activates when you open a markdown file. You can also manually activate with `:Presenterm activate`.
 
 ### Keybindings
 
@@ -95,8 +95,9 @@ require("presenterm").setup({
 
 **Option 3: Map commands manually**
 ```lua
-vim.keymap.set("n", "]s", ":PresenterNext<cr>")
-vim.keymap.set("n", "[s", ":PresenterPrev<cr>")
+vim.keymap.set("n", "]s", ":Presenterm next<cr>")
+vim.keymap.set("n", "[s", ":Presenterm prev<cr>")
+-- Note: Use the new :Presenterm command pattern shown below in Commands section
 ```
 
 <details>
@@ -121,40 +122,42 @@ vim.keymap.set("n", "[s", ":PresenterPrev<cr>")
 
 ### Commands
 
+All commands use the `:Presenterm <command>` pattern for a clean namespace.
+
 #### Navigation
-- `:PresenterNext` - Go to next slide
-- `:PresenterPrev` - Go to previous slide
-- `:PresenterGoto N` - Go to slide N
-- `:PresenterList` - List all slides with telescope
+- `:Presenterm next` - Go to next slide
+- `:Presenterm prev` - Go to previous slide
+- `:Presenterm goto N` - Go to slide N
+- `:Presenterm list` - List all slides with telescope
 
 #### Slide Management
-- `:PresenterNew` - Create new slide after current
-- `:PresenterSplit` - Split slide at cursor position
-- `:PresenterDelete` - Delete current slide
-- `:PresenterYank` - Yank current slide
-- `:PresenterSelect` - Visually select current slide
-- `:PresenterMoveUp` - Move slide up
-- `:PresenterMoveDown` - Move slide down
-- `:PresenterReorder` - Interactive slide reordering
+- `:Presenterm new` - Create new slide after current
+- `:Presenterm split` - Split slide at cursor position
+- `:Presenterm delete` - Delete current slide
+- `:Presenterm yank` - Yank current slide
+- `:Presenterm select` - Visually select current slide
+- `:Presenterm move-up` - Move slide up
+- `:Presenterm move-down` - Move slide down
+- `:Presenterm reorder` - Interactive slide reordering
 
 #### Partials
-- `:PresenterPartial include` - Include partial file
-- `:PresenterPartial edit` - Edit partial file
-- `:PresenterPartial list` - List all partials
+- `:Presenterm partial include` - Include partial file
+- `:Presenterm partial edit` - Edit partial file
+- `:Presenterm partial list` - List all partials
 
 #### Code Blocks
-- `:PresenterExec toggle` - Toggle code execution flags (plain → +exec → +exec_replace → +exec +acquire_terminal)
-- `:PresenterExec run` - Run current code block
+- `:Presenterm exec toggle` - Toggle code execution flags (plain → +exec → +exec_replace → +exec +acquire_terminal)
+- `:Presenterm exec run` - Run current code block
 
 #### Preview
-- `:PresenterPreview` - Preview presentation in terminal split
-- `:PresenterStats` - Show presentation statistics
-- `:PresenterToggleSync` - Toggle bi-directional sync (navigate in markdown → presenterm follows, and vice versa)
+- `:Presenterm preview` - Preview presentation in terminal split
+- `:Presenterm stats` - Show presentation statistics
+- `:Presenterm toggle-sync` - Toggle bi-directional sync (navigate in markdown → presenterm follows, and vice versa)
 
 #### Other
-- `:PresenterActivate` - Manually activate presenterm mode
-- `:PresenterDeactivate` - Deactivate presenterm mode for current buffer
-- `:PresenterHelp` - Show help
+- `:Presenterm activate` - Manually activate presenterm mode
+- `:Presenterm deactivate` - Deactivate presenterm mode for current buffer
+- `:Presenterm help` - Show help
 
 ## Preview Sync
 
@@ -186,11 +189,11 @@ The slide picker shows all slides with titles extracted from the content, includ
 
 The partial picker has two modes:
 
-- **Include mode** (`:PresenterPartial include`):
+- **Include mode** (`:Presenterm partial include`):
   - `<CR>` - Insert include directive
   - `<C-e>` - Edit the partial file
 
-- **Edit mode** (`:PresenterPartial edit`):
+- **Edit mode** (`:Presenterm partial edit`):
   - `<CR>` - Edit the partial file
   - `<C-i>` - Insert include directive
 
