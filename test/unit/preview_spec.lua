@@ -45,6 +45,9 @@ describe('preview', function()
       end
       return ''
     end
+    vim.fn.shellescape = function(str)
+      return "'" .. str .. "'"
+    end
 
     vim.cmd = function() end
     vim.notify = function() end
@@ -144,6 +147,67 @@ describe('preview', function()
       assert.truthy(cmd_content)
       -- Should have the file path in the command
       assert.truthy(cmd_content:match('my presentation%.md'))
+    end)
+
+    it('should use login shell when login_shell is true', function()
+      vim.g.presenterm = {
+        preview = {
+          command = 'presenterm',
+          login_shell = true,
+        },
+      }
+      vim.o.shell = '/bin/bash'
+
+      package.loaded['presenterm.config'] = nil
+      package.loaded['presenterm.preview'] = nil
+      package.loaded['presenterm.slides'] = {
+        get_current_slide = function()
+          return 1, { 0, 3, 7, 11 }
+        end,
+      }
+      preview = require('presenterm.preview')
+
+      local cmd_content
+      vim.cmd = function(command)
+        if command:match('terminal') then
+          cmd_content = command
+        end
+      end
+
+      preview.preview()
+      assert.truthy(cmd_content)
+      assert.truthy(cmd_content:match('/bin/bash'))
+      assert.truthy(cmd_content:match('%-lic'))
+    end)
+
+    it('should not use login shell when login_shell is false', function()
+      vim.g.presenterm = {
+        preview = {
+          command = 'presenterm',
+          login_shell = false,
+        },
+      }
+
+      package.loaded['presenterm.config'] = nil
+      package.loaded['presenterm.preview'] = nil
+      package.loaded['presenterm.slides'] = {
+        get_current_slide = function()
+          return 1, { 0, 3, 7, 11 }
+        end,
+      }
+      preview = require('presenterm.preview')
+
+      local cmd_content
+      vim.cmd = function(command)
+        if command:match('terminal') then
+          cmd_content = command
+        end
+      end
+
+      preview.preview()
+      assert.truthy(cmd_content)
+      assert.is_false(cmd_content:match('%-lic') ~= nil)
+      assert.truthy(cmd_content:match('presenterm'))
     end)
   end)
 

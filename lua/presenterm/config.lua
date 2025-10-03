@@ -15,6 +15,7 @@ local M = {}
 ---@class PresenterMPreviewConfig
 ---@field command? string Command to run for preview
 ---@field presentation_preview_sync? boolean Enable bi-directional sync between terminal and buffer
+---@field login_shell? boolean Use login shell (-icl) to load full environment (default: true)
 
 ---@class PresenterMTelescopeConfig
 ---@field theme? string Telescope theme to use
@@ -31,6 +32,7 @@ M.defaults = {
   preview = {
     command = 'presenterm',
     presentation_preview_sync = false,
+    login_shell = true, -- Load full shell environment (slower but safer)
   },
   telescope = {
     theme = 'dropdown',

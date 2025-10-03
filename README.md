@@ -28,6 +28,18 @@ A Neovim plugin for creating and managing [presenterm](https://github.com/mfonta
 
 ### lazy.nvim
 
+**Minimal setup (uses defaults):**
+```lua
+{
+  "Piotr1215/presenterm.nvim",
+  dependencies = {
+    "nvim-telescope/telescope.nvim", -- Optional, for telescope integration
+  },
+  opts = {},  -- Uses all defaults
+}
+```
+
+**Custom setup (for presentations with executable commands):**
 ```lua
 {
   "Piotr1215/presenterm.nvim",
@@ -36,14 +48,10 @@ A Neovim plugin for creating and managing [presenterm](https://github.com/mfonta
   },
   config = function()
     require("presenterm").setup({
-      slide_marker = "<!-- end_slide -->",
-      partials = {
-        directory = "_partials",
-        resolve_relative = true,
-      },
+      default_keybindings = true,           -- Enable default keymaps
       preview = {
-        command = "presenterm",
-        presentation_preview_sync = true,  -- Enable bi-directional sync
+        command = "presenterm -xX",         -- Enable command execution
+        presentation_preview_sync = true,   -- Enable bi-directional sync
       },
     })
   end,
@@ -203,29 +211,48 @@ sections = {
 
 ## Configuration
 
-Default configuration:
+### Default Configuration
 
 ```lua
 {
   slide_marker = "<!-- end_slide -->",
   partials = {
-    directory = "_partials",           -- Directory name for partials
-    resolve_relative = true,           -- Resolve paths relative to current file
+    directory = "_partials",
+    resolve_relative = true,
   },
   preview = {
-    command = "presenterm",              -- Preview command
-    presentation_preview_sync = false,   -- Enable bi-directional sync between terminal and buffer
+    command = "presenterm",              -- Safe: commands won't execute
+    presentation_preview_sync = false,
+    login_shell = true,                  -- Loads PATH, env vars, etc.
   },
   telescope = {
     theme = "dropdown",
-    layout_config = {
-      width = 0.8,
-      height = 0.6,
-    },
+    layout_config = { width = 0.8, height = 0.6 },
     enable_preview = true,
   },
-  on_attach = nil,                     -- Optional callback function(bufnr) for buffer-local keymaps
-  default_keybindings = false,         -- Set to true to enable default buffer-local keymaps
+  on_attach = nil,
+  default_keybindings = false,
+}
+```
+
+By default:
+- Commands in slides display but don't execute (safe for untrusted presentations)
+- Shell environment loaded (PATH, nvm, pyenv, env vars available)
+- No automatic keybindings (set `default_keybindings = true` or configure manually)
+
+### Common Configurations
+
+**For presentations with live demos (docker, node, etc.):**
+```lua
+preview = {
+  command = "presenterm -xX",  -- Executes +exec code blocks
+}
+```
+
+**Faster startup (skip environment loading):**
+```lua
+preview = {
+  login_shell = false,  -- ~200-500ms faster, but PATH, env vars unavailable
 }
 ```
 

@@ -206,7 +206,18 @@ function M.preview()
   state.source_buf = vim.api.nvim_get_current_buf()
 
   -- Launch in neovim terminal (vertical split)
-  vim.cmd(string.format('vsplit | terminal %s %s', cfg.preview.command, file))
+  local shell = vim.o.shell or '/bin/bash'
+  local cmd
+
+  if cfg.preview.login_shell then
+    -- Use interactive login shell to load full environment (KUBECONFIG, PATH, etc.)
+    cmd = string.format('%s -lic "%s %s"', shell, cfg.preview.command, vim.fn.shellescape(file))
+  else
+    -- Direct execution (faster but env may not be loaded)
+    cmd = string.format('%s %s', cfg.preview.command, vim.fn.shellescape(file))
+  end
+
+  vim.cmd('vsplit | terminal ' .. cmd)
 
   -- Store terminal buffer and channel
   state.terminal_buf = vim.api.nvim_get_current_buf()
