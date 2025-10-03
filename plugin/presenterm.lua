@@ -21,7 +21,7 @@ local subcommand_tbl = {
       require('presenterm').previous_slide()
     end,
   },
-  goto = {
+  ['goto'] = {
     impl = function(args, opts)
       local slide_num = tonumber(args[1])
       if slide_num then
@@ -93,7 +93,8 @@ local subcommand_tbl = {
     end,
     complete = function(subcmd_arg_lead)
       local partial_args = { 'include', 'edit', 'list' }
-      return vim.iter(partial_args)
+      return vim
+        .iter(partial_args)
         :filter(function(arg)
           return arg:find(subcmd_arg_lead) ~= nil
         end)
@@ -114,7 +115,8 @@ local subcommand_tbl = {
     end,
     complete = function(subcmd_arg_lead)
       local exec_args = { 'toggle', 'run' }
-      return vim.iter(exec_args)
+      return vim
+        .iter(exec_args)
         :filter(function(arg)
           return arg:find(subcmd_arg_lead) ~= nil
         end)
@@ -190,7 +192,8 @@ vim.api.nvim_create_user_command('Presenterm', presenterm_cmd, {
     if cmdline:match("^['<,'>]*Presenterm[!]*%s+%w*$") then
       -- Filter subcommands that match
       local subcommand_keys = vim.tbl_keys(subcommand_tbl)
-      return vim.iter(subcommand_keys)
+      return vim
+        .iter(subcommand_keys)
         :filter(function(key)
           return key:find(arg_lead) ~= nil
         end)
