@@ -230,7 +230,6 @@ function M.preview()
     state.last_buffer_slide = nil
     setup_terminal_monitoring() -- Terminal → Buffer
     setup_buffer_monitoring() -- Buffer → Terminal
-    vim.notify('Bi-directional sync enabled', vim.log.levels.INFO)
   end
 
   vim.cmd('startinsert')
@@ -240,7 +239,6 @@ end
 function M.toggle_sync()
   state.sync_enabled = not state.sync_enabled
   if state.sync_enabled then
-    vim.notify('Bi-directional sync enabled', vim.log.levels.INFO)
     setup_terminal_monitoring()
     setup_buffer_monitoring()
   else
