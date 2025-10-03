@@ -119,3 +119,29 @@ end, { desc = 'Manually activate presenterm mode' })
 vim.api.nvim_create_user_command('PresenterHelp', function()
   require('presenterm').show_help()
 end, { desc = 'Show presenterm help' })
+
+-- Auto-activate presenterm for presentation files
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'markdown',
+  callback = function(args)
+    vim.schedule(function()
+      if not vim.b.presenterm_active and require('presenterm.slides').is_presentation() then
+        vim.b.presenterm_active = true
+        vim.notify('Presenterm mode activated', vim.log.levels.INFO)
+
+        local config = require('presenterm.config').get()
+
+        -- Setup default keybindings if enabled
+        if config.default_keybindings then
+          require('presenterm.keybindings').setup_default(args.buf)
+        end
+
+        -- Call on_attach callback if configured
+        if config.on_attach then
+          config.on_attach(args.buf)
+        end
+      end
+    end)
+  end,
+  desc = 'Auto-activate presenterm for presentation files',
+})

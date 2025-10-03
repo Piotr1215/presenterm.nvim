@@ -14,13 +14,14 @@ A Neovim plugin for creating and managing [presenterm](https://github.com/mfonta
 
 ## Features
 
-- **Slide Management**: Navigate, create, delete, reorder slides with ease
-- **Partial Support**: Include reusable content from partial files with smart title detection
-- **Telescope Integration**: Browse slides and partials with preview, slides with partials marked with [P]
-- **Interactive Reordering**: Reorder slides with dd/p vim motions, shows proper titles from partials
-- **Code Execution**: Toggle and run executable code blocks
-- **Live Preview**: Launch presenterm preview in terminal
-- **Statistics**: View presentation stats and time estimates
+- **Slide Management**      : Navigate, create, delete, reorder slides with ease using vim motions or telescope picker
+- **Partial Support**       : Include reusable content from partial files, useful when working with multiple presentations
+- **Telescope Integration** : Browse slides and partials with preview, slides with partials marked with [P]
+- **Interactive Reordering**: Reorder slides interactively using vim line movements
+- **Code Execution**        : Toggle `presenterm` code execution markers (`+exec`, `+exec_replace` etc) 
+- **Execute Code Blocks**   : Run code blocks directly from Neovim
+- **Live Preview**          : Launch `presenterm` preview in terminal
+- **Statistics**            : View presentation stats and time estimates
 
 ## Installation
 
@@ -61,7 +62,52 @@ luarocks install presenterm.nvim
 
 ## Usage
 
-The plugin provides user commands instead of default keymappings, following Neovim best practices. You can map these commands to your preferred keys.
+The plugin automatically detects `presenterm` presentations (by looking for slide markers like `<!-- end_slide -->` or frontmatter) and activates when you open a markdown file. You can also manually activate with `:PresenterActivate`.
+
+### Keybindings
+
+**Option 1: Use defaults** (recommended)
+```lua
+require("presenterm").setup({
+  default_keybindings = true,
+})
+```
+
+**Option 2: Customize with `on_attach`**
+```lua
+require("presenterm").setup({
+  on_attach = function(bufnr)
+    vim.keymap.set("n", "]s", require("presenterm").next_slide, { buffer = bufnr, desc = "Next slide" })
+    vim.keymap.set("n", "[s", require("presenterm").previous_slide, { buffer = bufnr, desc = "Previous slide" })
+  end,
+})
+```
+
+**Option 3: Map commands manually**
+```lua
+vim.keymap.set("n", "]s", ":PresenterNext<cr>")
+vim.keymap.set("n", "[s", ":PresenterPrev<cr>")
+```
+
+<details>
+<summary>Default keymaps (when default_keybindings = true)</summary>
+
+- `]s` / `[s` - Next/previous slide
+- `<leader>sn` - New slide
+- `<leader>ss` - Split slide
+- `<leader>sd` - Delete slide
+- `<leader>sy` - Yank slide
+- `<leader>sv` - Select slide
+- `<leader>sk` / `<leader>sj` - Move slide up/down
+- `<leader>sR` - Reorder slides
+- `<leader>sl` - List slides (telescope)
+- `<leader>sp` - Include partial (telescope)
+- `<C-e>` - Toggle +exec
+- `<leader>sr` - Run code block
+- `<leader>sP` - Preview presentation
+- `<leader>sc` - Presentation stats
+
+</details>
 
 ### Commands
 
@@ -97,28 +143,6 @@ The plugin provides user commands instead of default keymappings, following Neov
 #### Other
 - `:PresenterActivate` - Manually activate presenterm mode
 - `:PresenterHelp` - Show help
-
-### Example Keybindings
-
-```lua
--- Navigation
-vim.keymap.set("n", "]s", ":PresenterNext<cr>", { desc = "Next slide" })
-vim.keymap.set("n", "[s", ":PresenterPrev<cr>", { desc = "Previous slide" })
-vim.keymap.set("n", "<leader>sl", ":PresenterList<cr>", { desc = "List slides" })
-
--- Slide management
-vim.keymap.set("n", "<leader>sn", ":PresenterNew<cr>", { desc = "New slide" })
-vim.keymap.set("n", "<leader>sd", ":PresenterDelete<cr>", { desc = "Delete slide" })
-vim.keymap.set("n", "<leader>sy", ":PresenterYank<cr>", { desc = "Yank slide" })
-
--- Partials
-vim.keymap.set("n", "<leader>sp", ":PresenterPartial include<cr>", { desc = "Include partial" })
-vim.keymap.set("n", "<leader>spe", ":PresenterPartial edit<cr>", { desc = "Edit partial" })
-
--- Preview
-vim.keymap.set("n", "<leader>sP", ":PresenterPreview<cr>", { desc = "Preview presentation" })
-vim.keymap.set("n", "<leader>sc", ":PresenterStats<cr>", { desc = "Show stats" })
-```
 
 ## Telescope Integration
 
@@ -180,12 +204,14 @@ Default configuration:
     },
     enable_preview = true,
   },
+  on_attach = nil,               -- Optional callback function(bufnr) for buffer-local keymaps
+  default_keybindings = false,   -- Set to true to enable default buffer-local keymaps
 }
 ```
 
 ## Presentation Structure
 
-A typical presenterm presentation structure:
+A typical `presenterm` presentation structure:
 
 ```
 project/
@@ -221,7 +247,6 @@ echo "This code can be executed"
 ```
 
 <!-- end_slide -->
-```
 
 ## License
 

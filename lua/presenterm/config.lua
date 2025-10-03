@@ -5,6 +5,8 @@ local M = {}
 ---@field partials? PresenterMPartialsConfig Partials configuration
 ---@field preview? PresenterMPreviewConfig Preview configuration
 ---@field telescope? PresenterMTelescopeConfig Telescope configuration
+---@field on_attach? function Callback function when presenterm activates for a buffer
+---@field default_keybindings? boolean Set up default buffer-local keybindings automatically
 
 ---@class PresenterMPartialsConfig
 ---@field directory? string Default partials directory name
@@ -36,6 +38,7 @@ M.defaults = {
     },
     enable_preview = true,
   },
+  default_keybindings = false,
 }
 
 -- Initialize configuration

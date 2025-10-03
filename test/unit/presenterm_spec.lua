@@ -20,6 +20,8 @@ describe('presenterm', function()
 
   describe('slide_status', function()
     it('should return empty string when not in presentation', function()
+      -- Clear any activation state
+      vim.b.presenterm_active = nil
       local status = presenterm.slide_status()
       assert.equals('', status)
     end)

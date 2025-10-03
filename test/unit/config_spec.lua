@@ -69,5 +69,42 @@ describe('config', function()
       assert.equals('ivy', vim.g.presenterm.telescope.theme)
       assert.is_not_nil(vim.g.presenterm.telescope.layout_config) -- defaults preserved
     end)
+
+    it('should accept on_attach callback', function()
+      config.setup({
+        on_attach = function(_)
+          -- callback for testing
+        end,
+      })
+      assert.is_function(vim.g.presenterm.on_attach)
+    end)
+
+    it('should preserve on_attach callback in config', function()
+      local callback = function(_) end
+      config.setup({
+        on_attach = callback,
+      })
+      local cfg = config.get()
+      assert.equals(callback, cfg.on_attach)
+    end)
+  end)
+
+  describe('on_attach', function()
+    it('should be nil by default', function()
+      local cfg = config.get()
+      assert.is_nil(cfg.on_attach)
+    end)
+
+    it('should be callable when configured', function()
+      local bufnr_received = nil
+      config.setup({
+        on_attach = function(bufnr)
+          bufnr_received = bufnr
+        end,
+      })
+      local cfg = config.get()
+      cfg.on_attach(42)
+      assert.equals(42, bufnr_received)
+    end)
   end)
 end)
