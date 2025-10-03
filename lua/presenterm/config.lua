@@ -14,6 +14,7 @@ local M = {}
 
 ---@class PresenterMPreviewConfig
 ---@field command? string Command to run for preview
+---@field presentation_preview_sync? boolean Enable bi-directional sync between terminal and buffer
 
 ---@class PresenterMTelescopeConfig
 ---@field theme? string Telescope theme to use
@@ -29,6 +30,7 @@ M.defaults = {
   },
   preview = {
     command = 'presenterm',
+    presentation_preview_sync = false,
   },
   telescope = {
     theme = 'dropdown',

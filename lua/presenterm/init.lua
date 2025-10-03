@@ -85,6 +85,27 @@ function M.activate()
   end
 end
 
+function M.deactivate()
+  local bufnr = vim.api.nvim_get_current_buf()
+  vim.b.presenterm_active = false
+
+  -- Remove default keybindings if they were set
+  if vim.b.presenterm_default_keybindings then
+    require('presenterm.keybindings').remove_default(bufnr)
+  end
+
+  -- Mark on_attach state
+  if vim.b.presenterm_on_attach_called then
+    vim.b.presenterm_on_attach_called = nil
+    vim.notify(
+      'Presenterm mode deactivated (on_attach keybindings must be removed manually)',
+      vim.log.levels.INFO
+    )
+  else
+    vim.notify('Presenterm mode deactivated', vim.log.levels.INFO)
+  end
+end
+
 function M.show_help()
   local help_lines = {
     'Presenterm Commands:',
@@ -120,6 +141,7 @@ function M.show_help()
     '',
     'Other:',
     '  :PresenterActivate   - Activate presenterm mode',
+    '  :PresenterDeactivate - Deactivate presenterm mode',
     '  :PresenterHelp       - Show this help',
   }
 

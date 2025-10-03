@@ -18,9 +18,10 @@ A Neovim plugin for creating and managing [presenterm](https://github.com/mfonta
 - **Partial Support**       : Include reusable content from partial files, useful when working with multiple presentations
 - **Telescope Integration** : Browse slides and partials with preview, slides with partials marked with [P]
 - **Interactive Reordering**: Reorder slides interactively using vim line movements
-- **Code Execution**        : Toggle `presenterm` code execution markers (`+exec`, `+exec_replace` etc) 
+- **Code Execution**        : Toggle `presenterm` code execution markers (`+exec`, `+exec_replace` etc)
 - **Execute Code Blocks**   : Run code blocks directly from Neovim
-- **Live Preview**          : Launch `presenterm` preview in terminal
+- **Live Preview**          : Launch `presenterm` preview in terminal with bi-directional sync
+- **Bi-directional Sync**   : Navigate in markdown or presenterm, both stay synchronized
 - **Statistics**            : View presentation stats and time estimates
 
 ## Installation
@@ -42,6 +43,7 @@ A Neovim plugin for creating and managing [presenterm](https://github.com/mfonta
       },
       preview = {
         command = "presenterm",
+        presentation_preview_sync = true,  -- Enable bi-directional sync
       },
     })
   end,
@@ -137,12 +139,31 @@ vim.keymap.set("n", "[s", ":PresenterPrev<cr>")
 - `:PresenterExec run` - Run current code block
 
 #### Preview
-- `:PresenterPreview` - Preview presentation
+- `:PresenterPreview` - Preview presentation in terminal split
 - `:PresenterStats` - Show presentation statistics
+- `:PresenterToggleSync` - Toggle bi-directional sync (navigate in markdown → presenterm follows, and vice versa)
 
 #### Other
 - `:PresenterActivate` - Manually activate presenterm mode
+- `:PresenterDeactivate` - Deactivate presenterm mode for current buffer
 - `:PresenterHelp` - Show help
+
+## Preview Sync
+
+When `presentation_preview_sync = true`, navigation is synchronized bi-directionally:
+
+**Buffer → Terminal**: Navigate in markdown with any motion (`j`, `k`, `gg`, `G`, `/`, etc.) → presenterm jumps to that slide
+
+**Terminal → Presenterm**: Navigate in presenterm (`n`, `p`, `<number>G`) → markdown buffer cursor moves to that slide
+
+**Requirements**:
+- Presenterm footer must show slide count (e.g., "1 / 10")
+- Works automatically with/without frontmatter (adjusts slide numbering)
+- Sync prevents loops with 100ms debounce
+
+**Does NOT work when**:
+- Presenterm footer is customized to hide slide numbers
+- Using custom footer configuration without "N / M" pattern
 
 ## Telescope Integration
 
@@ -188,13 +209,12 @@ Default configuration:
 {
   slide_marker = "<!-- end_slide -->",
   partials = {
-    directory = "_partials",     -- Directory name for partials
-    resolve_relative = true,     -- Resolve paths relative to current file
+    directory = "_partials",           -- Directory name for partials
+    resolve_relative = true,           -- Resolve paths relative to current file
   },
   preview = {
-    command = "presenterm",      -- Preview command
-    use_tmux = true,            -- Use tmux if available
-    tmux_direction = "h",       -- Tmux split direction (h/v)
+    command = "presenterm",              -- Preview command
+    presentation_preview_sync = false,   -- Enable bi-directional sync between terminal and buffer
   },
   telescope = {
     theme = "dropdown",
@@ -204,8 +224,8 @@ Default configuration:
     },
     enable_preview = true,
   },
-  on_attach = nil,               -- Optional callback function(bufnr) for buffer-local keymaps
-  default_keybindings = false,   -- Set to true to enable default buffer-local keymaps
+  on_attach = nil,                     -- Optional callback function(bufnr) for buffer-local keymaps
+  default_keybindings = false,         -- Set to true to enable default buffer-local keymaps
 }
 ```
 

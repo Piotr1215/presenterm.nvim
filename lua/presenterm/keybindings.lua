@@ -1,5 +1,26 @@
 local M = {}
 
+---List of default keybindings
+M.default_keys = {
+  { mode = 'n', lhs = ']s' },
+  { mode = 'n', lhs = '[s' },
+  { mode = 'n', lhs = '<leader>sn' },
+  { mode = 'n', lhs = '<leader>ss' },
+  { mode = 'n', lhs = '<leader>sd' },
+  { mode = 'n', lhs = '<leader>sy' },
+  { mode = 'n', lhs = '<leader>sv' },
+  { mode = 'n', lhs = '<leader>sk' },
+  { mode = 'n', lhs = '<leader>sj' },
+  { mode = 'n', lhs = '<leader>sR' },
+  { mode = 'n', lhs = '<leader>sl' },
+  { mode = 'n', lhs = '<leader>sp' },
+  { mode = 'n', lhs = '<C-e>' },
+  { mode = 'i', lhs = '<C-e>' },
+  { mode = 'n', lhs = '<leader>sr' },
+  { mode = 'n', lhs = '<leader>sP' },
+  { mode = 'n', lhs = '<leader>sc' },
+}
+
 ---Setup default keybindings for a buffer
 ---@param bufnr number Buffer number
 function M.setup_default(bufnr)
@@ -80,6 +101,18 @@ function M.setup_default(bufnr)
     presenterm.presentation_stats,
     { buffer = bufnr, desc = 'Presentation stats' }
   )
+
+  -- Mark that default keybindings were set
+  vim.b[bufnr].presenterm_default_keybindings = true
+end
+
+---Remove default keybindings from a buffer
+---@param bufnr number Buffer number
+function M.remove_default(bufnr)
+  for _, key in ipairs(M.default_keys) do
+    pcall(vim.keymap.del, key.mode, key.lhs, { buffer = bufnr })
+  end
+  vim.b[bufnr].presenterm_default_keybindings = nil
 end
 
 return M

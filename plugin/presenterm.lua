@@ -111,10 +111,18 @@ vim.api.nvim_create_user_command('PresenterStats', function()
   require('presenterm').presentation_stats()
 end, { desc = 'Show presentation statistics' })
 
+vim.api.nvim_create_user_command('PresenterToggleSync', function()
+  require('presenterm.preview').toggle_sync()
+end, { desc = 'Toggle bi-directional sync between terminal and buffer' })
+
 -- Activation
 vim.api.nvim_create_user_command('PresenterActivate', function()
   require('presenterm').activate()
 end, { desc = 'Manually activate presenterm mode' })
+
+vim.api.nvim_create_user_command('PresenterDeactivate', function()
+  require('presenterm').deactivate()
+end, { desc = 'Deactivate presenterm mode for current buffer' })
 
 vim.api.nvim_create_user_command('PresenterHelp', function()
   require('presenterm').show_help()
@@ -138,6 +146,7 @@ vim.api.nvim_create_autocmd('FileType', {
 
         -- Call on_attach callback if configured
         if config.on_attach then
+          vim.b[args.buf].presenterm_on_attach_called = true
           config.on_attach(args.buf)
         end
       end

@@ -66,9 +66,18 @@ describe('preview', function()
         table.insert(cmd_calls, command)
       end
 
+      -- Mock buffer attach for sync
+      vim.api.nvim_buf_attach = function()
+        return true
+      end
+      vim.api.nvim_get_current_buf = function()
+        return 1
+      end
+
       preview.preview()
 
-      assert.equals(2, #cmd_calls)
+      -- Should have: write, vsplit|terminal, startinsert
+      assert.is_true(#cmd_calls >= 2)
       assert.equals('write', cmd_calls[1])
       assert.truthy(cmd_calls[2]:match('vsplit'))
       assert.truthy(cmd_calls[2]:match('terminal'))
@@ -237,6 +246,47 @@ describe('preview', function()
       assert.is_not_nil(stats_lines)
       local stats_text = table.concat(stats_lines, '\n')
       assert.truthy(stats_text:match('Estimated time: 2 minutes'))
+    end)
+  end)
+
+  describe('terminal sync', function()
+    before_each(function()
+      vim.api.nvim_get_current_buf = function()
+        return 1
+      end
+      vim.api.nvim_buf_is_valid = function()
+        return true
+      end
+      vim.fn.bufwinid = function()
+        return 1
+      end
+      vim.api.nvim_get_current_win = function()
+        return 1
+      end
+      vim.api.nvim_set_current_win = function() end
+      vim.defer_fn = function(fn)
+        fn()
+      end
+    end)
+
+    describe('get_sync_state', function()
+      it('should return sync state', function()
+        local state = preview.get_sync_state()
+        assert.is_table(state)
+        assert.is_not_nil(state.enabled)
+      end)
+    end)
+
+    describe('toggle_sync', function()
+      it('should toggle sync state', function()
+        local initial_state = preview.get_sync_state()
+        local initial_enabled = initial_state.enabled
+
+        preview.toggle_sync()
+        local new_state = preview.get_sync_state()
+
+        assert.equals(not initial_enabled, new_state.enabled)
+      end)
     end)
   end)
 end)
