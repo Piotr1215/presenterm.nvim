@@ -183,11 +183,32 @@ local function setup_buffer_monitoring()
   })
 end
 
+---Check if presenterm CLI is available
+---@return boolean
+local function is_presenterm_available()
+  local handle = io.popen('which presenterm 2>/dev/null')
+  if not handle then
+    return false
+  end
+  local result = handle:read('*a')
+  handle:close()
+  return result and result ~= ''
+end
+
 ---Launch presenterm preview
 function M.preview()
   local file = vim.fn.expand('%:p')
   if not file:match('%.md$') then
     vim.notify('Not a markdown file', vim.log.levels.ERROR)
+    return
+  end
+
+  -- Check if presenterm CLI is available
+  if not is_presenterm_available() then
+    vim.notify(
+      'presenterm CLI not found in PATH. Run :checkhealth presenterm for details.',
+      vim.log.levels.ERROR
+    )
     return
   end
 

@@ -335,6 +335,35 @@ echo "This code can be executed"
 
 <!-- end_slide -->
 
+## Troubleshooting
+
+Run `:checkhealth presenterm` to diagnose common issues.
+
+The health check will verify:
+- Plugin is loaded and configured correctly
+- presenterm CLI is installed and in PATH
+- Picker plugins (telescope/fzf-lua/snacks) availability
+- Partials directory configuration
+- Preview and sync settings
+
+**Common issues:**
+
+- **Preview not working:** Ensure presenterm CLI is installed:
+  ```bash
+  cargo install presenterm
+  # or check https://github.com/mfontanini/presenterm
+  ```
+
+- **No picker UI:** Install one of:
+  - `telescope.nvim`
+  - `fzf-lua`
+  - `snacks.nvim`
+
+- **Sync not working:** Check that:
+  - `presentation_preview_sync = true` in config
+  - presenterm footer shows slide numbers (e.g., "1 / 10")
+  - Not using custom footer that hides slide numbers
+
 ## License
 
 MIT
