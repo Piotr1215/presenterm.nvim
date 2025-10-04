@@ -27,10 +27,13 @@ A Neovim plugin for creating and managing [presenterm](https://github.com/mfonta
 
 ### lazy.nvim
 
+> [!NOTE] lazy.nvim [auto-detects rockspec files](https://lazy.folke.io/packages#rockspec) and will try to [build via luarocks](https://lazy.folke.io/developers#building) by default. Since this is a pure Lua plugin that doesn't require compilation, add `build = false` to skip the build step and avoid needing lua5.1/luajit.
+
 **Minimal setup (uses defaults):**
 ```lua
 {
   "Piotr1215/presenterm.nvim",
+  build = false,  -- Disable rockspec/luarocks build
   opts = {},  -- Uses all defaults, auto-detects picker
 }
 ```
@@ -39,9 +42,10 @@ A Neovim plugin for creating and managing [presenterm](https://github.com/mfonta
 ```lua
 {
   "Piotr1215/presenterm.nvim",
+  build = false,
   dependencies = {
     -- Choose one (or install separately):
-    "nvim-telescope/telescope.nvim", -- Option 1: Telescope
+    "nvim-telescope/telescope.nvim",  -- Option 1: Telescope
     -- "ibhagwan/fzf-lua",            -- Option 2: fzf-lua
     -- "folke/snacks.nvim",           -- Option 3: Snacks
   },
@@ -53,6 +57,7 @@ A Neovim plugin for creating and managing [presenterm](https://github.com/mfonta
 ```lua
 {
   "Piotr1215/presenterm.nvim",
+  build = false,
   config = function()
     require("presenterm").setup({
       default_keybindings = true,
@@ -68,13 +73,23 @@ A Neovim plugin for creating and managing [presenterm](https://github.com/mfonta
 }
 ```
 
-### rocks.nvim
+### packer.nvim
+
+```lua
+use "Piotr1215/presenterm.nvim"
+```
+
+### rocks.nvim (Optional)
+
+> **Note:** This method may require lua5.1 or luajit installed on your system.
 
 ```vim
 :Rocks install presenterm.nvim
 ```
 
-### luarocks
+### luarocks (Optional)
+
+> **Note:** This method requires lua5.1 or luajit installed on your system.
 
 ```bash
 luarocks install presenterm.nvim
