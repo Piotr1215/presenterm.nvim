@@ -52,6 +52,16 @@ describe('preview', function()
     vim.cmd = function() end
     vim.notify = function() end
 
+    -- Mock io.popen for presenterm availability check
+    io.popen = function(cmd)
+      return {
+        read = function()
+          return '/usr/bin/presenterm'
+        end,
+        close = function() end,
+      }
+    end
+
     -- Mock buffer and window creation for stats
     vim.api.nvim_create_buf = function()
       return 1

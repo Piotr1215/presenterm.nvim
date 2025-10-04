@@ -4,7 +4,9 @@ local M = {}
 ---@field slide_marker? string The marker used to separate slides
 ---@field partials? PresenterMPartialsConfig Partials configuration
 ---@field preview? PresenterMPreviewConfig Preview configuration
+---@field picker? PresenterMPickerConfig Picker configuration
 ---@field telescope? PresenterMTelescopeConfig Telescope configuration
+---@field layout? PresenterMLayoutConfig Layout configuration
 ---@field on_attach? function Callback function when presenterm activates for a buffer
 ---@field default_keybindings? boolean Set up default buffer-local keybindings automatically
 
@@ -16,6 +18,12 @@ local M = {}
 ---@field command? string Command to run for preview
 ---@field presentation_preview_sync? boolean Enable bi-directional sync between terminal and buffer
 ---@field login_shell? boolean Use login shell (-icl) to load full environment (default: true)
+
+---@class PresenterMPickerConfig
+---@field provider? string Picker provider: "telescope", "fzf", "snacks", or "builtin"
+
+---@class PresenterMLayoutConfig
+---@field templates? table Custom layout templates
 
 ---@class PresenterMTelescopeConfig
 ---@field theme? string Telescope theme to use
@@ -51,8 +59,10 @@ M.defaults = {
 ---@return PresenterMConfig
 function M.get()
   if not vim.g.presenterm then
+    ---@type PresenterMConfig
     vim.g.presenterm = vim.tbl_deep_extend('force', {}, M.defaults)
   end
+  ---@type PresenterMConfig
   return vim.g.presenterm
 end
 

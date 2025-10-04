@@ -21,6 +21,7 @@ end
 ---Get the configured or detected picker
 ---@return string
 function M.get_picker()
+  ---@type PresenterMConfig
   local config = require('presenterm.config').get()
   if config.picker and config.picker.provider then
     -- Validate configured picker is available

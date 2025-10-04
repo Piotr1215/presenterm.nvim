@@ -18,6 +18,7 @@ local default_templates = {
 ---Get available layout templates
 ---@return table<string, table> Templates with their configurations
 function M.get_templates()
+  ---@type PresenterMConfig
   local cfg = config.get()
   local custom_templates = cfg.layout and cfg.layout.templates or {}
   local templates = vim.tbl_deep_extend('force', default_templates, custom_templates)

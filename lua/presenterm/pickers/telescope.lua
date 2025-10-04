@@ -14,8 +14,11 @@ function M.slide_picker(opts)
   local conf = require('telescope.config').values
   local actions = require('telescope.actions')
   local action_state = require('telescope.actions.state')
+  local previewers = require('telescope.previewers')
 
   local slide_list = navigation.get_slide_titles()
+  local positions = slides.get_slide_positions()
+  local buf_lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
 
   -- Reverse the slide list so first slide appears at top
   local reversed_slides = {}
@@ -38,6 +41,17 @@ function M.slide_picker(opts)
         end,
       }),
       sorter = conf.generic_sorter(opts),
+      previewer = previewers.new_buffer_previewer({
+        title = 'Slide Content',
+        define_preview = function(self, entry, _)
+          -- Extract actual slide content
+          local start_line = positions[entry.value.index] + 1
+          local end_line = positions[entry.value.index + 1] - 1
+          local slide_content = vim.list_slice(buf_lines, start_line, end_line)
+          vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, slide_content)
+          vim.bo[self.state.bufnr].filetype = 'markdown'
+        end,
+      }),
       attach_mappings = function(prompt_bufnr, map)
         actions.select_default:replace(function()
           actions.close(prompt_bufnr)
@@ -56,9 +70,9 @@ function M.slide_picker(opts)
             navigation.go_to_slide(selection.value.index)
             -- Find and open first partial in this slide
             vim.schedule(function()
-              local positions = slides.get_slide_positions()
-              local start_line = positions[selection.value.index] + 1
-              local end_line = positions[selection.value.index + 1] - 1
+              local slide_positions = slides.get_slide_positions()
+              local start_line = slide_positions[selection.value.index] + 1
+              local end_line = slide_positions[selection.value.index + 1] - 1
 
               -- Search for partial includes in the slide
               local lines = vim.api.nvim_buf_get_lines(0, start_line - 1, end_line, false)
@@ -178,9 +192,36 @@ function M.layout_picker(opts)
   local conf = require('telescope.config').values
   local actions = require('telescope.actions')
   local action_state = require('telescope.actions.state')
+  local previewers = require('telescope.previewers')
   local layout = require('presenterm.layout')
 
   local templates = layout.get_templates()
+
+  -- Helper to format layout array for comment
+  local function format_layout(layout_array)
+    local parts = {}
+    for _, width in ipairs(layout_array) do
+      table.insert(parts, tostring(width))
+    end
+    return '[' .. table.concat(parts, ', ') .. ']'
+  end
+
+  -- Helper to generate preview text
+  local function generate_layout_preview(dimensions)
+    local lines = {}
+    table.insert(lines, '<!-- column_layout: ' .. format_layout(dimensions) .. ' -->')
+    table.insert(lines, '')
+    for i = 0, #dimensions - 1 do
+      table.insert(lines, '<!-- column: ' .. i .. ' -->')
+      table.insert(lines, '')
+      if i < #dimensions - 1 then
+        table.insert(lines, '')
+      end
+    end
+    table.insert(lines, '')
+    table.insert(lines, '<!-- reset_layout -->')
+    return lines
+  end
 
   -- Convert templates to picker entries
   local entries = {}
@@ -207,6 +248,14 @@ function M.layout_picker(opts)
         end,
       }),
       sorter = conf.generic_sorter(opts),
+      previewer = previewers.new_buffer_previewer({
+        title = 'Layout Syntax',
+        define_preview = function(self, entry, _)
+          local preview_lines = generate_layout_preview(entry.value.dimensions)
+          vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, preview_lines)
+          vim.bo[self.state.bufnr].filetype = 'markdown'
+        end,
+      }),
       attach_mappings = function(prompt_bufnr, _)
         actions.select_default:replace(function()
           local selection = action_state.get_selected_entry()

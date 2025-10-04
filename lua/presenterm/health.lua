@@ -50,6 +50,7 @@ end
 
 ---Check picker plugin availability
 local function check_picker_plugins()
+  ---@type PresenterMConfig
   local config = require('presenterm.config').get()
   local configured_picker = config.picker and config.picker.provider
 
