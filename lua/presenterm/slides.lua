@@ -88,7 +88,7 @@ end
 ---Create new slide after current
 function M.new_slide()
   local current, positions = M.get_current_slide()
-  local insert_line = positions[current + 1] - 1
+  local insert_line = positions[current + 1]
 
   -- If we're at the last slide, insert at the end
   if current == #positions - 1 then
@@ -96,7 +96,7 @@ function M.new_slide()
   end
 
   local cfg = config.get()
-  -- Insert empty lines and slide marker
+  -- Insert empty lines and slide marker after current slide's end marker
   local new_content = { '', '', '', cfg.slide_marker }
   vim.fn.append(insert_line, new_content)
 
@@ -198,7 +198,6 @@ function M.yank_slide()
   -- Yank using yy command (into registers)
   if lines_to_yank > 0 then
     vim.cmd('normal! ' .. lines_to_yank .. 'yy')
-    vim.notify('Slide yanked (' .. lines_to_yank .. ' lines)', vim.log.levels.INFO)
   end
 
   -- Return cursor to original position
@@ -289,7 +288,6 @@ function M.move_slide_up()
   local current, positions = M.get_current_slide()
 
   if current == 1 then
-    vim.notify('Already at the first slide', vim.log.levels.WARN)
     return
   end
 
@@ -323,7 +321,6 @@ function M.move_slide_down()
   local total_slides = #positions - 1
 
   if current == total_slides then
-    vim.notify('Already at the last slide', vim.log.levels.WARN)
     return
   end
 
@@ -453,7 +450,6 @@ function M.interactive_reorder()
 
     -- Apply changes
     vim.api.nvim_buf_set_lines(original_buf, 0, -1, false, new_lines)
-    vim.notify('Slides reordered successfully', vim.log.levels.INFO)
     vim.cmd('close')
   end
 
