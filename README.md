@@ -12,6 +12,12 @@ A Neovim plugin for creating and managing [presenterm](https://github.com/mfonta
 
 </div>
 
+<div align="center">
+
+![presenterm.nvim Demo](examples/presenterm.nvim-intro.gif)
+
+</div>
+
 ## Features
 
 - **Slide Management**      : Navigate, create, delete, reorder slides with ease using vim motions
