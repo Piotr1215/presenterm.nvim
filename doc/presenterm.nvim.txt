@@ -24,6 +24,7 @@ for slide navigation, partials management, and live preview.
 
 
 
+
 FEATURES                            *presenterm.nvim-presenterm.nvim-features*
 
 - **Slide Management** : Navigate, create, delete, reorder slides with ease using vim motions
