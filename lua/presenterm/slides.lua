@@ -3,7 +3,7 @@ local M = {}
 local config = require('presenterm.config')
 
 -- Constants
-local SLIDE_PATTERN = '<!%-%- end_slide %-%->'
+local SLIDE_PATTERN = config.get().slide_marker
 
 ---Get frontmatter end line
 ---@return number Line number where frontmatter ends (0 if no frontmatter)
@@ -32,7 +32,7 @@ function M.get_slide_positions()
   table.insert(positions, frontmatter_end)
 
   for i, line in ipairs(lines) do
-    if line:match(SLIDE_PATTERN) and i > frontmatter_end then
+    if line:find(SLIDE_PATTERN, 1, true) and i > frontmatter_end then
       table.insert(positions, i)
     end
   end
@@ -65,7 +65,7 @@ function M.is_presentation()
   -- Check for slide markers in the file
   local lines = vim.api.nvim_buf_get_lines(0, 0, math.min(100, vim.fn.line('$')), false)
   for _, line in ipairs(lines) do
-    if line:match(SLIDE_PATTERN) then
+    if line:find(SLIDE_PATTERN, 1, true) then
       return true
     end
   end
@@ -271,7 +271,7 @@ function M.get_slide_content(slide_num, positions, skip_pre_header)
   end
 
   -- Remove the slide marker from the end if present
-  if #slide_lines > 0 and slide_lines[#slide_lines]:match(SLIDE_PATTERN) then
+  if #slide_lines > 0 and slide_lines[#slide_lines]:find(SLIDE_PATTERN, 1, true) then
     table.remove(slide_lines)
   end
 
