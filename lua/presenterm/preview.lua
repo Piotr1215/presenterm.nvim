@@ -186,13 +186,7 @@ end
 ---Check if presenterm CLI is available
 ---@return boolean
 local function is_presenterm_available()
-  local handle = io.popen('which presenterm 2>/dev/null')
-  if not handle then
-    return false
-  end
-  local result = handle:read('*a')
-  handle:close()
-  return result and result ~= ''
+  return vim.fn.executable('presenterm') == 1
 end
 
 ---Launch presenterm preview
@@ -221,14 +215,16 @@ function M.preview()
   state.source_buf = vim.api.nvim_get_current_buf()
 
   -- Launch in neovim terminal (vertical split)
-  local shell = vim.o.shell or '/bin/bash'
+  local is_windows = vim.fn.has('win32') == 1 or vim.fn.has('win64') == 1
   local cmd
 
-  if cfg.preview.login_shell then
+  -- Windows doesn't support login shell flags (-lic)
+  if cfg.preview.login_shell and not is_windows then
     -- Use interactive login shell to load full environment (KUBECONFIG, PATH, etc.)
+    local shell = vim.o.shell or '/bin/bash'
     cmd = string.format('%s -lic "%s %s"', shell, cfg.preview.command, vim.fn.shellescape(file))
   else
-    -- Direct execution (faster but env may not be loaded)
+    -- Direct execution (Windows or when login_shell is disabled)
     cmd = string.format('%s %s', cfg.preview.command, vim.fn.shellescape(file))
   end
 

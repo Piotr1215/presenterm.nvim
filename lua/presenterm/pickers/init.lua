@@ -25,6 +25,7 @@ function M.get_picker()
   local config = require('presenterm.config').get()
   if config.picker and config.picker.provider then
     -- Validate configured picker is available
+    ---@type string
     local provider = config.picker.provider
     if
       provider ~= 'builtin' and not pcall(require, provider == 'fzf' and 'fzf-lua' or provider)
