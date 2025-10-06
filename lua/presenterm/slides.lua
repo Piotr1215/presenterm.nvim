@@ -2,8 +2,31 @@ local M = {}
 
 local config = require('presenterm.config')
 
--- Constants
-local SLIDE_PATTERN = config.get().slide_marker
+---Check if a line is a slide marker
+---@param line string Line to check
+---@param slide_marker string Configured slide marker
+---@return boolean
+local function is_slide_marker(line, slide_marker)
+  -- Check for <!-- end_slide --> marker (always works)
+  if line:find('<!-- end_slide -->', 1, true) then
+    return true
+  end
+
+  -- Check if configured marker is a dash-based marker (shorthand mode)
+  -- This includes ---, ----, ----------, etc. (3+ dashes)
+  local is_dash_marker = slide_marker:match('^%-%-%-+$') ~= nil
+
+  if is_dash_marker then
+    -- In shorthand mode: detect thematic breaks (3+ dashes, optionally with spaces)
+    -- Must be ONLY dashes and spaces, no other characters (like |)
+    local trimmed = line:match('^%s*(.-)%s*$')
+    if trimmed and trimmed:match('^%-%-%-+$') then
+      return true
+    end
+  end
+
+  return false
+end
 
 ---Get frontmatter end line
 ---@return number Line number where frontmatter ends (0 if no frontmatter)
@@ -24,6 +47,8 @@ end
 ---Get all slide positions in buffer
 ---@return table Array of slide boundary line numbers
 function M.get_slide_positions()
+  local cfg = config.get()
+  local slide_marker = cfg.slide_marker or '<!-- end_slide -->'
   local positions = {}
   local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
   local frontmatter_end = M.get_frontmatter_end()
@@ -32,7 +57,7 @@ function M.get_slide_positions()
   table.insert(positions, frontmatter_end)
 
   for i, line in ipairs(lines) do
-    if line:find(SLIDE_PATTERN, 1, true) and i > frontmatter_end then
+    if is_slide_marker(line, slide_marker) and i > frontmatter_end then
       table.insert(positions, i)
     end
   end
@@ -62,10 +87,12 @@ end
 ---Check if file is a presentation
 ---@return boolean
 function M.is_presentation()
+  local cfg = config.get()
+  local slide_marker = cfg.slide_marker or '<!-- end_slide -->'
   -- Check for slide markers in the file
   local lines = vim.api.nvim_buf_get_lines(0, 0, math.min(100, vim.fn.line('$')), false)
   for _, line in ipairs(lines) do
-    if line:find(SLIDE_PATTERN, 1, true) then
+    if is_slide_marker(line, slide_marker) then
       return true
     end
   end
@@ -247,6 +274,8 @@ end
 ---@param skip_pre_header boolean Skip content before first header
 ---@return table Lines of the slide
 function M.get_slide_content(slide_num, positions, skip_pre_header)
+  local cfg = config.get()
+  local slide_marker = cfg.slide_marker or '<!-- end_slide -->'
   local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
   local frontmatter_end = M.get_frontmatter_end()
   local start_line = positions[slide_num] + 1
@@ -271,7 +300,7 @@ function M.get_slide_content(slide_num, positions, skip_pre_header)
   end
 
   -- Remove the slide marker from the end if present
-  if #slide_lines > 0 and slide_lines[#slide_lines]:find(SLIDE_PATTERN, 1, true) then
+  if #slide_lines > 0 and is_slide_marker(slide_lines[#slide_lines], slide_marker) then
     table.remove(slide_lines)
   end
 
