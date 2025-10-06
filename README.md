@@ -33,7 +33,8 @@ A Neovim plugin for creating and managing [presenterm](https://github.com/mfonta
 
 ### lazy.nvim
 
-> [!NOTE] lazy.nvim [auto-detects rockspec files](https://lazy.folke.io/packages#rockspec) and will try to [build via luarocks](https://lazy.folke.io/developers#building) by default. Since this is a pure Lua plugin that doesn't require compilation, add `build = false` to skip the build step and avoid needing lua5.1/luajit.
+> [!NOTE]
+> lazy.nvim [auto-detects rockspec files](https://lazy.folke.io/packages#rockspec) and will try to [build via luarocks](https://lazy.folke.io/developers#building) by default. Since this is a pure Lua plugin that doesn't require compilation, add `build = false` to skip the build step and avoid needing lua5.1/luajit.
 
 **Minimal setup (uses defaults):**
 ```lua
