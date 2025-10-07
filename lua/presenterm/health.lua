@@ -30,7 +30,11 @@ end
 
 ---Check if presenterm CLI is available
 local function check_presenterm_cli()
-  local handle = io.popen('which presenterm 2>/dev/null')
+  -- Use OS-appropriate command to check for executable
+  local is_windows = vim.fn.has('win32') == 1 or vim.fn.has('win64') == 1
+  local check_cmd = is_windows and 'where presenterm 2>nul' or 'which presenterm 2>/dev/null'
+
+  local handle = io.popen(check_cmd)
   if not handle then
     warn('Could not check for presenterm CLI')
     return

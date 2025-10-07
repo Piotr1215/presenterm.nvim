@@ -52,14 +52,20 @@ describe('preview', function()
     vim.cmd = function() end
     vim.notify = function() end
 
-    -- Mock io.popen for presenterm availability check
-    io.popen = function(cmd)
-      return {
-        read = function()
-          return '/usr/bin/presenterm'
-        end,
-        close = function() end,
-      }
+    -- Mock vim.fn.executable for presenterm availability check
+    vim.fn.executable = function(cmd)
+      if cmd == 'presenterm' then
+        return 1 -- Presenterm is available
+      end
+      return 0
+    end
+
+    -- Mock vim.fn.has for Windows detection
+    vim.fn.has = function(feature)
+      if feature == 'win32' or feature == 'win64' then
+        return 0 -- Not Windows by default
+      end
+      return 0
     end
 
     -- Mock buffer and window creation for stats
