@@ -224,4 +224,52 @@ function M.layout_picker(opts)
   })
 end
 
+---FZF-lua template picker
+---@param callback function Callback function (template_key)
+---@param opts table|nil Options
+function M.template_picker(callback, opts)
+  opts = opts or {}
+
+  local fzf_lua = require('fzf-lua')
+  local templates = require('presenterm.templates')
+
+  local template_list = templates.list()
+
+  -- Build entries and lookup table
+  local entries = {}
+  local lookup = {}
+
+  for _, tmpl in ipairs(template_list) do
+    local display = string.format('[%s] %s - %s', tmpl.category, tmpl.name, tmpl.description)
+    table.insert(entries, display)
+    lookup[display] = {
+      key = tmpl.key,
+      name = tmpl.name,
+      description = tmpl.description,
+      category = tmpl.category,
+    }
+  end
+
+  fzf_lua.fzf_exec(entries, {
+    prompt = 'Select Presentation Template> ',
+    preview = function(selected)
+      local data = lookup[selected[1]]
+      if not data then
+        return ''
+      end
+      return templates.generate_preview(data.key)
+    end,
+    actions = {
+      ['default'] = function(selected)
+        if #selected > 0 then
+          local data = lookup[selected[1]]
+          if data and callback then
+            callback(data.key)
+          end
+        end
+      end,
+    },
+  })
+end
+
 return M

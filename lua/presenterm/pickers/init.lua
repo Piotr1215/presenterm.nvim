@@ -155,4 +155,51 @@ function M.layout_picker(opts)
   end
 end
 
+---Fallback template picker using vim.ui.select
+---@param callback function Callback function (template_key)
+local function template_picker_fallback(callback)
+  local templates = require('presenterm.templates')
+  local template_list = templates.list()
+
+  local items = {}
+  for _, tmpl in ipairs(template_list) do
+    table.insert(items, {
+      display = string.format('[%s] %s - %s', tmpl.category, tmpl.name, tmpl.description),
+      key = tmpl.key,
+      name = tmpl.name,
+      category = tmpl.category,
+    })
+  end
+
+  vim.ui.select(items, {
+    prompt = 'Select Template:',
+    format_item = function(item)
+      return item.display
+    end,
+  }, function(choice)
+    if choice and callback then
+      callback(choice.key)
+    end
+  end)
+end
+
+---Main template picker with auto-detection
+---@param callback function Callback function (template_key)
+---@param opts table|nil Options
+function M.template_picker(callback, opts)
+  local picker = M.get_picker()
+
+  if picker == 'builtin' then
+    template_picker_fallback(callback)
+  else
+    local picker_mod = require('presenterm.pickers.' .. picker)
+    if picker_mod.template_picker then
+      picker_mod.template_picker(callback, opts)
+    else
+      -- Fallback if picker doesn't implement template_picker yet
+      template_picker_fallback(callback)
+    end
+  end
+end
+
 return M

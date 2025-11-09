@@ -161,6 +161,46 @@ local subcommand_tbl = {
       require('presenterm.layout').layout_picker()
     end,
   },
+  -- Template commands
+  template = {
+    impl = function(args, opts)
+      local subcommand = args[1]
+      if subcommand == 'new' then
+        local template_key = args[2]
+        require('presenterm').new_presentation({ template_key = template_key })
+      else
+        vim.notify('Unknown template subcommand. Use: new [template_name]', vim.log.levels.ERROR)
+      end
+    end,
+    complete = function(subcmd_arg_lead)
+      -- Parse the subcmd_arg_lead to determine what we're completing
+      local parts = vim.split(vim.trim(subcmd_arg_lead), '%s+')
+
+      -- If no parts or first part doesn't match 'new', complete subcommand
+      if #parts == 0 or (parts[1] ~= 'new' and string.find('new', parts[1], 1, true)) then
+        return { 'new' }
+      end
+
+      -- If first part is 'new', complete template names
+      if parts[1] == 'new' then
+        local templates = require('presenterm.templates').list()
+        local template_keys = vim.tbl_map(function(t)
+          return t.key
+        end, templates)
+
+        -- Filter based on partial input if provided
+        local filter = parts[2] or ''
+        return vim
+          .iter(template_keys)
+          :filter(function(key)
+            return filter == '' or key:find(filter, 1, true) ~= nil
+          end)
+          :totable()
+      end
+
+      return {}
+    end,
+  },
 }
 
 ---@param opts table :h lua-guide-commands-create
