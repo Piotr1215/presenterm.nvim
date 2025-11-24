@@ -1,6 +1,6 @@
 # presenterm.nvim
 
-A Neovim plugin for creating and managing [presenterm](https://github.com/mfontanini/presenterm) presentations with enhanced support for slide navigation, partials management, and live preview.
+A Neovim plugin for creating and managing [presenterm](https://github.com/mfontanini/presenterm) presentations with support for slide navigation, partials management, and live preview.
 
 <div align="center">
 
@@ -28,6 +28,16 @@ A Neovim plugin for creating and managing [presenterm](https://github.com/mfonta
 - **Live Preview**          : Launch `presenterm` preview in terminal with bi-directional sync
 - **Bi-directional Sync**   : Navigate in markdown or presenterm, both stay synchronized
 - **Statistics**            : View presentation stats and time estimates
+- **Templates**             : Bootstrap presentations from templates (Tech Talk, Workshop, Lightning Talk, Pitch, etc.)
+
+## Requirements
+
+- **Neovim** 0.9.0+
+- **presenterm** 0.2.0+ (for full feature support)
+  - Column layouts supported in presenterm v0.3.0+
+  - Code execution features vary by version
+
+Install presenterm: `cargo install presenterm` or see [presenterm installation docs](https://mfontanini.github.io/presenterm/guides/install.html)
 
 ## Installation
 
@@ -192,6 +202,20 @@ Available templates:
 - Centered content: 20/60/20
 
 Inserts full scaffolding with `<!-- column_layout: [x, y] -->`, column markers, and `<!-- reset_layout -->`.
+
+#### Templates
+- `:Presenterm template new [template_name]` - Create new presentation from template
+
+**Available templates:**
+- `tech-talk` - Technical presentation with demo sections
+- `lightning-talk` - Quick 5-minute presentation format
+- `workshop` - Hands-on workshop with exercises
+- `minimal` - Blank presentation with basic structure
+- `pitch` - Product pitch or sales presentation
+
+> **Note**: Templates are currently stored in code (`lua/presenterm/templates.lua`).
+> **Planned**: User-editable template directory (`~/.config/nvim/presenterm/templates/`)
+> for custom templates and editing defaults.
 
 #### Preview
 - `:Presenterm preview` - Preview presentation in terminal split

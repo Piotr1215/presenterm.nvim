@@ -238,4 +238,46 @@ function M.layout_picker(opts)
   })
 end
 
+---Snacks template picker
+---@param callback function Callback function (template_key)
+---@param opts table|nil Options
+function M.template_picker(callback, opts)
+  opts = opts or {}
+
+  local snacks = require('snacks')
+  local templates = require('presenterm.templates')
+
+  local template_list = templates.list()
+
+  -- Build items for snacks picker
+  local items = {}
+  for _, tmpl in ipairs(template_list) do
+    local display = string.format('[%s] %s - %s', tmpl.category, tmpl.name, tmpl.description)
+    local lines = templates.generate_preview(tmpl.key)
+
+    table.insert(items, {
+      text = display,
+      key = tmpl.key,
+      preview = { text = table.concat(lines, '\n'), ft = 'markdown' },
+    })
+  end
+
+  snacks.picker.pick({
+    prompt = 'Select Presentation Template',
+    items = items,
+    format = function(item)
+      return { { item.text } }
+    end,
+    preview = snacks.picker.preview.preview,
+    confirm = function(picker, item)
+      picker:close()
+      if item and callback then
+        vim.schedule(function()
+          callback(item.key)
+        end)
+      end
+    end,
+  })
+end
+
 return M
