@@ -1,4 +1,5 @@
-*presenterm.nvim.txt*Neovim plugin for creating and managing presenterm presentations
+*presenterm.nvim.txt* Neovim plugin for creating and managing presenterm presentations
+                           For Neovim >= 0.9.0    Last change: 2026 October 07
 
 ==============================================================================
 Table of Contents                          *presenterm.nvim-table-of-contents*
@@ -320,6 +321,7 @@ DEFAULT CONFIGURATION ~
         command = "presenterm",              -- Safe: commands won't execute
         presentation_preview_sync = false,
         login_shell = true,                  -- Loads PATH, env vars, etc.
+        image_protocol = "ascii-blocks",     -- Only protocol Neovim's terminal can show
       },
       picker = {
         provider = nil,  -- Auto-detect: telescope > fzf > snacks > builtin
@@ -374,19 +376,19 @@ Example presentation.md:
     title: My Presentation
     author: Your Name
     ---
-    
+
     # Welcome
-    
+
     First slide content
-    
+
     <!-- end_slide -->
-    
+
     <!-- include: ../_partials/intro.md -->
-    
+
     <!-- end_slide -->
-    
+
     ## Demo
-    
+
     ```bash +exec
     echo "This code can be executed"
 <
@@ -404,14 +406,20 @@ Preview and sync settings
 **Common issues:**
 
 - **Preview not working:** Ensure presenterm CLI is installed:
-    >bash
+
+>bash
         cargo install presenterm
         # or check https://github.com/mfontanini/presenterm
-    <
+<
 - **No picker UI:** Install one of:
     - `telescope.nvim`
     - `fzf-lua`
     - `snacks.nvim`
+- **Images, Typst, LaTeX, or Mermaid render as blocks or not at all:** Neovim’s
+    terminal cannot display image protocols (kitty, iTerm2, sixel), so the preview
+    passes `--image-protocol ascii-blocks` to presenterm. For full resolution
+    images, run `presenterm` directly in a terminal that supports one. To let
+    presenterm pick the protocol itself, set `image_protocol = false`.
 - **Sync not working:** Check that:
     - `presentation_preview_sync = true` in config
     - presenterm footer shows slide numbers (e.g., "1 / 10")
