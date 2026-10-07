@@ -273,6 +273,7 @@ sections = {
     command = "presenterm",              -- Safe: commands won't execute
     presentation_preview_sync = false,
     login_shell = true,                  -- Loads PATH, env vars, etc.
+    image_protocol = "ascii-blocks",     -- Only protocol Neovim's terminal can show
   },
   picker = {
     provider = nil,  -- Auto-detect: telescope > fzf > snacks > builtin
@@ -365,6 +366,8 @@ The health check will verify:
   - `telescope.nvim`
   - `fzf-lua`
   - `snacks.nvim`
+
+- **Images, Typst, LaTeX, or Mermaid render as blocks or not at all:** Neovim's terminal cannot display image protocols (kitty, iTerm2, sixel), so the preview passes `--image-protocol ascii-blocks` to presenterm. For full resolution images, run `presenterm` directly in a terminal that supports one. To let presenterm pick the protocol itself, set `image_protocol = false`.
 
 - **Sync not working:** Check that:
   - `presentation_preview_sync = true` in config

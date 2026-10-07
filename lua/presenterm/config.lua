@@ -18,6 +18,7 @@ local M = {}
 ---@field command? string Command to run for preview
 ---@field presentation_preview_sync? boolean Enable bi-directional sync between terminal and buffer
 ---@field login_shell? boolean Use login shell (-icl) to load full environment (default: true)
+---@field image_protocol? string|false presenterm --image-protocol value, false to let presenterm detect (default: "ascii-blocks")
 
 ---@class PresenterMPickerConfig
 ---@field provider? string Picker provider: "telescope", "fzf", "snacks", or "builtin"
@@ -41,6 +42,7 @@ M.defaults = {
     command = 'presenterm',
     presentation_preview_sync = false,
     login_shell = true, -- Load full shell environment (slower but safer)
+    image_protocol = 'ascii-blocks', -- Neovim's terminal cannot display other image protocols
   },
   telescope = {
     theme = 'dropdown',
