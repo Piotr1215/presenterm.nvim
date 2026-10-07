@@ -217,15 +217,23 @@ function M.preview()
   -- Launch in neovim terminal (vertical split)
   local is_windows = vim.fn.has('win32') == 1 or vim.fn.has('win64') == 1
   local cmd
+  local presenterm_cmd = cfg.preview.command
+
+  -- Neovim's terminal renders no image protocol (kitty, iterm2, sixel), so images
+  -- would vanish or leak escape codes unless presenterm falls back to ascii blocks
+  local protocol = cfg.preview.image_protocol
+  if protocol and not presenterm_cmd:match('%-%-image%-protocol') then
+    presenterm_cmd = string.format('%s --image-protocol %s', presenterm_cmd, protocol)
+  end
 
   -- Windows doesn't support login shell flags (-lic)
   if cfg.preview.login_shell and not is_windows then
     -- Use interactive login shell to load full environment (KUBECONFIG, PATH, etc.)
     local shell = vim.o.shell or '/bin/bash'
-    cmd = string.format('%s -lic "%s %s"', shell, cfg.preview.command, vim.fn.shellescape(file))
+    cmd = string.format('%s -lic "%s %s"', shell, presenterm_cmd, vim.fn.shellescape(file))
   else
     -- Direct execution (Windows or when login_shell is disabled)
-    cmd = string.format('%s %s', cfg.preview.command, vim.fn.shellescape(file))
+    cmd = string.format('%s %s', presenterm_cmd, vim.fn.shellescape(file))
   end
 
   vim.cmd('vsplit | terminal ' .. cmd)

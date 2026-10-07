@@ -227,6 +227,63 @@ describe('preview', function()
     end)
   end)
 
+  describe('image protocol', function()
+    -- Neovim's :terminal renders no graphics protocol, so presenterm must fall
+    -- back to ascii blocks or images vanish or leak escape codes (issue #10)
+    local function launch_with(preview_cfg)
+      vim.g.presenterm = { preview = preview_cfg }
+      package.loaded['presenterm.config'] = nil
+      package.loaded['presenterm.preview'] = nil
+      preview = require('presenterm.preview')
+
+      local cmd_content
+      vim.cmd = function(command)
+        if command:match('terminal') then
+          cmd_content = command
+        end
+      end
+      preview.preview()
+      return cmd_content
+    end
+
+    it('should pass the configured image protocol before the file', function()
+      local cmd = launch_with({ command = 'presenterm', image_protocol = 'ascii-blocks' })
+      assert.equals(
+        "vsplit | terminal presenterm --image-protocol ascii-blocks '/path/to/presentation.md'",
+        cmd
+      )
+    end)
+
+    it('should keep the flag inside the login shell command string', function()
+      vim.o.shell = '/bin/bash'
+      local cmd = launch_with({
+        command = 'presenterm',
+        login_shell = true,
+        image_protocol = 'ascii-blocks',
+      })
+      assert.equals(
+        [[vsplit | terminal /bin/bash -lic "presenterm --image-protocol ascii-blocks '/path/to/presentation.md'"]],
+        cmd
+      )
+    end)
+
+    it('should omit the flag when image_protocol is false', function()
+      local cmd = launch_with({ command = 'presenterm', image_protocol = false })
+      assert.equals("vsplit | terminal presenterm '/path/to/presentation.md'", cmd)
+    end)
+
+    it('should not override a protocol already set in the command', function()
+      local cmd = launch_with({
+        command = 'presenterm --image-protocol kitty-local',
+        image_protocol = 'ascii-blocks',
+      })
+      assert.equals(
+        "vsplit | terminal presenterm --image-protocol kitty-local '/path/to/presentation.md'",
+        cmd
+      )
+    end)
+  end)
+
   describe('presentation_stats', function()
     it('should calculate presentation statistics', function()
       vim.api.nvim_buf_get_lines = function()
