@@ -82,9 +82,23 @@ end
 -- Utility functions
 function M.activate()
   if require('presenterm.slides').is_presentation() then
-    vim.notify('Presenterm mode activated', vim.log.levels.INFO)
-    -- Set buffer-local indicator
+    local bufnr = vim.api.nvim_get_current_buf()
     vim.b.presenterm_active = true
+
+    local config = require('presenterm.config').get()
+
+    -- Setup default keybindings if enabled
+    if config.default_keybindings and not vim.b.presenterm_default_keybindings then
+      require('presenterm.keybindings').setup_default(bufnr)
+    end
+
+    -- Call on_attach callback if configured
+    if config.on_attach and not vim.b.presenterm_on_attach_called then
+      vim.b[bufnr].presenterm_on_attach_called = true
+      config.on_attach(bufnr)
+    end
+
+    vim.notify('Presenterm mode activated', vim.log.levels.INFO)
   else
     vim.notify('Not a presentation file', vim.log.levels.WARN)
   end

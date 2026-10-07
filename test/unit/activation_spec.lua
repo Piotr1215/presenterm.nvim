@@ -192,4 +192,54 @@ describe('activation', function()
       assert.is_true(custom_keymap_set)
     end)
   end)
+
+  -- :Presenterm activate must match the FileType auto-activation path
+  describe('manual activate', function()
+    local presenterm, setup_calls, attach_calls
+
+    before_each(function()
+      vim.b.presenterm_default_keybindings = nil
+      vim.b.presenterm_on_attach_called = nil
+      vim.notify = function() end
+      setup_calls, attach_calls = {}, {}
+      package.loaded['presenterm.slides'] = {
+        is_presentation = function()
+          return true
+        end,
+      }
+      package.loaded['presenterm.keybindings'] = {
+        setup_default = function(bufnr)
+          table.insert(setup_calls, bufnr)
+          vim.b[bufnr].presenterm_default_keybindings = true
+        end,
+      }
+      config.setup({
+        default_keybindings = true,
+        on_attach = function(bufnr)
+          table.insert(attach_calls, bufnr)
+        end,
+      })
+      package.loaded['presenterm'] = nil
+      presenterm = require('presenterm')
+    end)
+
+    after_each(function()
+      package.loaded['presenterm.keybindings'] = nil
+      package.loaded['presenterm'] = nil
+    end)
+
+    it('should set up default keybindings and call on_attach for the buffer', function()
+      presenterm.activate()
+      local bufnr = vim.api.nvim_get_current_buf()
+      assert.same({ bufnr }, setup_calls)
+      assert.same({ bufnr }, attach_calls)
+    end)
+
+    it('should not repeat setup when activated twice', function()
+      presenterm.activate()
+      presenterm.activate()
+      assert.equals(1, #setup_calls)
+      assert.equals(1, #attach_calls)
+    end)
+  end)
 end)
