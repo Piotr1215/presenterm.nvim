@@ -272,6 +272,11 @@ describe('preview', function()
       assert.equals("vsplit | terminal presenterm '/path/to/presentation.md'", cmd)
     end)
 
+    it('should fall back to presenterm when no command is configured', function()
+      local cmd = launch_with({ image_protocol = false })
+      assert.equals("vsplit | terminal presenterm '/path/to/presentation.md'", cmd)
+    end)
+
     it('should not override a protocol already set in the command', function()
       local cmd = launch_with({
         command = 'presenterm --image-protocol kitty-local',

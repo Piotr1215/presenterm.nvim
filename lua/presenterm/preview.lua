@@ -217,7 +217,7 @@ function M.preview()
   -- Launch in neovim terminal (vertical split)
   local is_windows = vim.fn.has('win32') == 1 or vim.fn.has('win64') == 1
   local cmd
-  local presenterm_cmd = cfg.preview.command
+  local presenterm_cmd = cfg.preview.command or 'presenterm'
 
   -- Neovim's terminal renders no image protocol (kitty, iterm2, sixel), so images
   -- would vanish or leak escape codes unless presenterm falls back to ascii blocks
