@@ -224,13 +224,51 @@ describe('partials', function()
       assert.is_true(intro_found)
     end)
 
-    it('should handle missing git root', function()
+    it('should find partials next to a presentation outside a git repo (issue #9)', function()
       vim.fn.system = function()
         return ''
       end
       local entries = partials.find_partials()
-      assert.is_table(entries)
-      assert.equals(0, #entries)
+      assert.equals(3, #entries)
+      assert.equals('_partials/intro.md', entries[1].relative_path)
+    end)
+
+    it('should find partials in a parent directory with a relative include path', function()
+      vim.fn.expand = function()
+        return '/home/user/project/slides/deep'
+      end
+      -- vim.fs.dirname calls fnamemodify(':h'), which the shared mock pins to the project root
+      local fnamemodify = vim.fn.fnamemodify
+      vim.fn.fnamemodify = function(fname, mods)
+        if mods == ':h' then
+          return fname:match('^(.*)/[^/]*$')
+        end
+        return fnamemodify(fname, mods)
+      end
+      vim.fn.isdirectory = function(dir)
+        return dir == '/home/user/project/_partials' and 1 or 0
+      end
+      local globbed
+      vim.fn.glob = function(pattern)
+        globbed = pattern
+        return { '/home/user/project/_partials/intro.md' }
+      end
+      local entries = partials.find_partials()
+      assert.equals('/home/user/project/_partials/*.md', globbed)
+      assert.equals('../../_partials/intro.md', entries[1].relative_path)
+    end)
+
+    it('should prefer the partials directory closest to the presentation', function()
+      vim.fn.expand = function()
+        return '/home/user/project/slides'
+      end
+      local globbed
+      vim.fn.glob = function(pattern)
+        globbed = pattern
+        return {}
+      end
+      partials.find_partials()
+      assert.equals('/home/user/project/slides/_partials/*.md', globbed)
     end)
 
     it('should handle missing partials directory', function()

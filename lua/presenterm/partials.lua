@@ -57,19 +57,34 @@ function M.get_partial_path(line)
   return nil
 end
 
+---Find the partials directory closest to the current file, searching upward
+---@param directory string Partials directory name
+---@return string|nil partials_dir Absolute path to the partials directory
+---@return string up Prefix ("", "../", ...) leading from the current file to its parent
+local function find_partials_dir(directory)
+  local dir = vim.fs.normalize(vim.fn.expand('%:p:h'))
+  local up = ''
+  while true do
+    local candidate = dir .. '/' .. directory
+    if vim.fn.isdirectory(candidate) == 1 then
+      return candidate, up
+    end
+    local parent = vim.fs.dirname(dir)
+    if not parent or parent == dir then
+      return nil, up
+    end
+    dir, up = parent, up .. '../'
+  end
+end
+
 ---Find all partial files in the configured directory
 ---@return table List of partial file info
 function M.find_partials()
   local cfg = config.get()
 
-  -- Find _partials directory relative to current file's git root
-  local git_root = vim.fn.system('git rev-parse --show-toplevel 2>/dev/null'):gsub('\n', '')
-  if git_root == '' then
-    return {}
-  end
-
-  local partials_dir = git_root .. '/' .. cfg.partials.directory
-  if vim.fn.isdirectory(partials_dir) ~= 1 then
+  -- No git repo needed: presenterm resolves includes relative to the presentation
+  local partials_dir, up = find_partials_dir(cfg.partials.directory)
+  if not partials_dir then
     return {}
   end
 
@@ -110,7 +125,7 @@ function M.find_partials()
       name = name_without_ext,
       title = title,
       path = filepath,
-      relative_path = '../' .. cfg.partials.directory .. '/' .. filename,
+      relative_path = up .. cfg.partials.directory .. '/' .. filename,
       preview = table.concat(preview_lines, ' '):sub(1, 100),
       preview_lines = preview_lines,
     })

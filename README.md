@@ -341,6 +341,8 @@ project/
     └── conclusion.md
 ```
 
+The partial pickers use the `_partials` directory closest to the presentation, searching from its folder upward. No git repository is needed, and inserted include paths are relative to the presentation.
+
 Example presentation.md:
 
 ```markdown
@@ -355,7 +357,7 @@ First slide content
 
 <!-- end_slide -->
 
-<!-- include: ../_partials/intro.md -->
+<!-- include: _partials/intro.md -->
 
 <!-- end_slide -->
 
