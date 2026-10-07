@@ -567,4 +567,73 @@ describe('exec', function()
       assert.is_true(notify_called)
     end)
   end)
+
+  -- presenterm 0.16 added +auto_exec and +pty as standalone executable attributes
+  describe('presenterm 0.16 exec attributes', function()
+    local function toggle(fence)
+      vim.api.nvim_buf_get_lines = function()
+        return { fence, 'top', '```' }
+      end
+      vim.fn.line = function()
+        return 2
+      end
+      local result
+      vim.fn.setline = function(_, content)
+        result = content
+      end
+      exec.toggle_exec()
+      return result
+    end
+
+    local cases = {
+      { fence = '```bash +exec', executable = true },
+      { fence = '```bash +exec_replace', executable = true },
+      { fence = '```rust +exec:rust-script', executable = true },
+      { fence = '```bash +auto_exec', executable = true },
+      { fence = '```bash +pty', executable = true },
+      { fence = '```bash +pty:standby:80:30', executable = true },
+      { fence = '```bash', executable = false },
+      { fence = '```bash +id:demo', executable = false },
+      { fence = '```bash +validate', executable = false },
+      { fence = '```c++', executable = false },
+    }
+    for _, case in ipairs(cases) do
+      it(string.format('is_executable(%q) is %s', case.fence, tostring(case.executable)), function()
+        assert.equals(case.executable, exec.is_executable(case.fence))
+      end)
+    end
+
+    it('should toggle +auto_exec back to plain', function()
+      assert.equals('```bash', toggle('```bash +auto_exec'))
+    end)
+
+    it('should toggle +pty with size and standby back to plain', function()
+      assert.equals('```bash', toggle('```bash +pty:standby:80:30'))
+    end)
+
+    it('should keep a custom executor when toggling +auto_exec off', function()
+      assert.equals('```rust +exec:rust-script', toggle('```rust +auto_exec:rust-script'))
+    end)
+
+    it('should fall back to +exec when +id: blocks a return to plain', function()
+      assert.equals('```bash +id:demo +exec', toggle('```bash +pty +id:demo'))
+    end)
+
+    for _, attr in ipairs({ '+auto_exec', '+pty' }) do
+      it('should run a bash block marked ' .. attr, function()
+        vim.api.nvim_buf_get_lines = function()
+          return { '```bash ' .. attr, 'top', '```' }
+        end
+        vim.fn.line = function()
+          return 2
+        end
+        local commands = {}
+        vim.cmd = function(command)
+          table.insert(commands, command)
+        end
+        exec.run_code_block()
+        assert.equals('split | terminal bash /tmp/test.sh', commands[1])
+      end)
+    end
+  end)
 end)
