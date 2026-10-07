@@ -271,4 +271,66 @@ function M.layout_picker(opts)
     :find()
 end
 
+---Telescope template picker
+---@param callback function Callback function (template_key)
+---@param opts table|nil Options
+function M.template_picker(callback, opts)
+  opts = opts or {}
+
+  local pickers = require('telescope.pickers')
+  local finders = require('telescope.finders')
+  local conf = require('telescope.config').values
+  local actions = require('telescope.actions')
+  local action_state = require('telescope.actions.state')
+  local previewers = require('telescope.previewers')
+  local templates = require('presenterm.templates')
+
+  local template_list = templates.list()
+
+  -- Create entries with display formatting
+  local entries = {}
+  for _, tmpl in ipairs(template_list) do
+    table.insert(entries, {
+      key = tmpl.key,
+      name = tmpl.name,
+      description = tmpl.description,
+      category = tmpl.category,
+      display = string.format('[%s] %s - %s', tmpl.category, tmpl.name, tmpl.description),
+      ordinal = tmpl.name .. ' ' .. tmpl.description .. ' ' .. tmpl.category,
+    })
+  end
+
+  pickers
+    .new(opts, {
+      prompt_title = 'Select Presentation Template',
+      finder = finders.new_table({
+        results = entries,
+        entry_maker = function(entry)
+          return entry
+        end,
+      }),
+      sorter = conf.generic_sorter(opts),
+      previewer = previewers.new_buffer_previewer({
+        title = 'Template Preview',
+        define_preview = function(self, entry, _)
+          local lines = templates.generate_preview(entry.key)
+          vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
+          vim.bo[self.state.bufnr].filetype = 'markdown'
+        end,
+      }),
+      attach_mappings = function(prompt_bufnr, _)
+        actions.select_default:replace(function()
+          local selection = action_state.get_selected_entry()
+          actions.close(prompt_bufnr)
+
+          if selection and callback then
+            callback(selection.key)
+          end
+        end)
+        return true
+      end,
+    })
+    :find()
+end
+
 return M

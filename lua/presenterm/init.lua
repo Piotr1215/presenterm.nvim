@@ -74,6 +74,11 @@ function M.presentation_stats()
   return require('presenterm.preview').presentation_stats()
 end
 
+-- Template and wizard functions
+function M.new_presentation(opts)
+  return require('presenterm.wizard').create_presentation(opts)
+end
+
 -- Utility functions
 function M.activate()
   if require('presenterm.slides').is_presentation() then
@@ -125,6 +130,9 @@ function M.show_help()
     '  :Presenterm move-up    - Move slide up',
     '  :Presenterm move-down  - Move slide down',
     '  :Presenterm reorder    - Interactive reordering',
+    '',
+    'Templates:',
+    '  :Presenterm template new [name] - Create new presentation from template',
     '',
     'Partials:',
     '  :Presenterm partial include - Include partial',
