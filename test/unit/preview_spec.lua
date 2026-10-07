@@ -369,6 +369,31 @@ describe('preview', function()
       assert.truthy(stats_text:match('1 executable'))
     end)
 
+    it('should count +auto_exec and +pty blocks as executable', function()
+      vim.api.nvim_buf_get_lines = function()
+        return {
+          '```bash +auto_exec',
+          'date',
+          '```',
+          '```bash +pty:80:30',
+          'top',
+          '```',
+          '```bash +validate',
+          'true',
+          '```',
+        }
+      end
+
+      local stats_lines
+      vim.api.nvim_buf_set_lines = function(_, _, _, _, lines)
+        stats_lines = lines
+      end
+
+      preview.presentation_stats()
+      local stats_text = table.concat(stats_lines, '\n')
+      assert.truthy(stats_text:match('2 executable'))
+    end)
+
     it('should estimate time based on word count', function()
       vim.api.nvim_buf_get_lines = function()
         local lines = {}

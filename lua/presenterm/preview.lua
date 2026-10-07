@@ -291,7 +291,7 @@ local function count_presentation_content(lines)
   for _, line in ipairs(lines) do
     if line:match('^```') then
       counts.code_blocks = counts.code_blocks + 1
-      if line:match('%+exec') then
+      if require('presenterm.exec').is_executable(line) then
         counts.exec_blocks = counts.exec_blocks + 1
       end
     elseif line:match('<!%-%- include: .+ %-%->') then
