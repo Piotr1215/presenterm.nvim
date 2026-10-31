@@ -1,4 +1,4 @@
-.PHONY: test test-busted test-plenary test-verbose test-old test-unit test-functional format clean install-hooks
+.PHONY: test test-busted test-plenary test-verbose test-old test-unit test-shuffled test-functional format clean install-hooks
 
 # Run tests with Busted (default - new test framework)
 test: test-busted
@@ -23,6 +23,12 @@ test-busted:
 test-unit:
 	@echo "🧪 Running unit tests..."
 	@./test/run_busted.sh --run unit
+
+# Run unit tests in shuffled file order, set SEED to replay a failure
+test-shuffled:
+	@seed=$${SEED:-$$(date +%s)}; \
+	echo "🔀 Running unit tests with seed $$seed..."; \
+	./test/run_busted.sh --run unit --shuffle-files --seed=$$seed
 
 # Run only functional tests with Busted
 test-functional:

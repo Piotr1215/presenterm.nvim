@@ -436,10 +436,9 @@ describe('preview', function()
       local on_cursor_moved, on_terminal_lines
       local current_slide, visible_slides, source_lines, terminal_lines
       local jumps, visited, in_source_buf, gone_buf
-      local saved_api, saved_schedule
+      local saved_schedule
 
       before_each(function()
-        saved_api = vim.tbl_extend('force', {}, vim.api)
         saved_schedule = vim.schedule
 
         current_slide, visible_slides = 1, { 1, 2, 3 }
@@ -507,9 +506,6 @@ describe('preview', function()
       after_each(function()
         package.loaded['presenterm.navigation'] = nil
         vim.schedule = saved_schedule
-        for name, fn in pairs(saved_api) do
-          vim.api[name] = fn
-        end
       end)
 
       for _, case in ipairs({
