@@ -22,3 +22,6 @@ jobs:
         uses: nvim-neorocks/nvim-busted-action@v1
         with:
           nvim_version: ${{ matrix.neovim_version }}
+
+      - name: Run tests in shuffled file order
+        run: make test-shuffled
