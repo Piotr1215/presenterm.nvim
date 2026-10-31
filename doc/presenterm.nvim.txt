@@ -1,5 +1,5 @@
 *presenterm.nvim.txt* Neovim plugin for creating and managing presenterm presentations
-                           For Neovim >= 0.9.0    Last change: 2026 October 07
+                           For Neovim >= 0.9.0    Last change: 2026 October 31
 
 ==============================================================================
 Table of Contents                          *presenterm.nvim-table-of-contents*
@@ -180,6 +180,7 @@ Default keymaps (when default_keybindings = true) ~
 - `<leader>sd` - Delete slide
 - `<leader>sy` - Yank slide
 - `<leader>sv` - Select slide
+- `<leader>sh` - Hide or show slide
 - `<leader>sk` / `<leader>sj` - Move slide up/down
 - `<leader>sR` - Reorder slides
 - `<leader>sl` - List slides
@@ -211,6 +212,7 @@ SLIDE MANAGEMENT
 - `:Presenterm delete` - Delete current slide
 - `:Presenterm yank` - Yank current slide
 - `:Presenterm select` - Visually select current slide
+- `:Presenterm hide` - Hide current slide with `<!-- skip_slide -->`, or show it again
 - `:Presenterm move-up` - Move slide up
 - `:Presenterm move-down` - Move slide down
 - `:Presenterm reorder` - Interactive slide reordering
