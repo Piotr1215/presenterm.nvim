@@ -65,11 +65,20 @@ local function should_sync()
   if not state.terminal_buf or not state.source_buf then
     return false
   end
-  if not vim.api.nvim_buf_is_valid(state.terminal_buf) then
+  if
+    not vim.api.nvim_buf_is_valid(state.terminal_buf)
+    or not vim.api.nvim_buf_is_valid(state.source_buf)
+  then
     state.sync_enabled = false
     return false
   end
   return true
+end
+
+---Get the source buffer's slides that presenterm shows
+---@return table Array of buffer slide numbers
+local function visible_slides()
+  return vim.api.nvim_buf_call(state.source_buf, slides.get_visible_slides)
 end
 
 ---Navigate source window to slide
@@ -96,11 +105,13 @@ local function sync_terminal_to_buffer()
     return
   end
 
+  local buffer_slide = visible_slides()[current_slide] or current_slide
+
   state.is_syncing = true
   state.last_terminal_slide = current_slide
-  state.last_buffer_slide = current_slide
+  state.last_buffer_slide = buffer_slide
 
-  navigate_to_slide(current_slide)
+  navigate_to_slide(buffer_slide)
 
   vim.defer_fn(function()
     state.is_syncing = false
@@ -122,14 +133,20 @@ local function sync_buffer_to_terminal()
     return
   end
 
+  -- presenterm does not count hidden slides, so on one the terminal stays put
+  local terminal_slide = vim.fn.index(visible_slides(), current_slide) + 1
+  if terminal_slide == 0 then
+    return
+  end
+
   state.is_syncing = true
   state.last_buffer_slide = current_slide
-  state.last_terminal_slide = current_slide
+  state.last_terminal_slide = terminal_slide
 
   -- Adjust for frontmatter: presenterm numbers from 2 when frontmatter exists
-  local presenterm_slide = current_slide
+  local presenterm_slide = terminal_slide
   if has_frontmatter() then
-    presenterm_slide = current_slide + 1
+    presenterm_slide = terminal_slide + 1
   end
 
   -- Send direct jump command (e.g., "3G" to go to slide 3)
