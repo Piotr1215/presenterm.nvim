@@ -1,5 +1,20 @@
 local M = {}
 
+-- Snippet attributes that make presenterm run a block (+auto_exec and +pty since 0.16)
+local executable_attributes = { exec = true, exec_replace = true, auto_exec = true, pty = true }
+
+---Check whether a code fence carries an attribute that makes presenterm run it
+---@param code_fence string The code fence line
+---@return boolean
+function M.is_executable(code_fence)
+  for attribute in code_fence:gmatch('%+([%w_]+)') do
+    if executable_attributes[attribute] then
+      return true
+    end
+  end
+  return false
+end
+
 ---Determine the next state in the toggle cycle
 ---@param code_fence string The code fence line
 ---@return string The next state in the cycle
@@ -10,6 +25,16 @@ local function get_next_exec_state(code_fence)
 
   -- If has +id: or custom executor, never return to plain
   local can_return_to_plain = not (has_id or custom_executor)
+
+  -- +auto_exec and +pty sit outside the cycle: toggling turns them off
+  if code_fence:match('%+auto_exec') or code_fence:match('%+pty') then
+    local new_fence = code_fence:gsub(' %+auto_exec:(%S+)', ' +exec:%1')
+    new_fence = new_fence:gsub(' %+auto_exec', ''):gsub(' %+pty%S*', '')
+    if can_return_to_plain or new_fence:match('%+exec') then
+      return new_fence
+    end
+    return new_fence .. ' +exec'
+  end
 
   -- Detect current state
   local has_exec = code_fence:match('%+exec')
@@ -98,7 +123,7 @@ function M.toggle_exec()
   vim.fn.setline(start_line, new_fence)
 end
 
----Run current code block (if it has +exec)
+---Run current code block (if presenterm would execute it)
 function M.run_code_block()
   local cursor_line = vim.fn.line('.')
   local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
@@ -122,9 +147,11 @@ function M.run_code_block()
     return
   end
 
-  -- Check if it has +exec
-  if not lines[start_line]:match('%+exec') then
-    vim.notify("Code block doesn't have +exec flag", vim.log.levels.WARN)
+  if not M.is_executable(lines[start_line]) then
+    vim.notify(
+      "Code block doesn't have +exec, +exec_replace, +auto_exec or +pty",
+      vim.log.levels.WARN
+    )
     return
   end
 
