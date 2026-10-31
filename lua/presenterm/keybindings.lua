@@ -9,6 +9,7 @@ M.default_keys = {
   { mode = 'n', lhs = '<leader>sd' },
   { mode = 'n', lhs = '<leader>sy' },
   { mode = 'n', lhs = '<leader>sv' },
+  { mode = 'n', lhs = '<leader>sh' },
   { mode = 'n', lhs = '<leader>sk' },
   { mode = 'n', lhs = '<leader>sj' },
   { mode = 'n', lhs = '<leader>sR' },
@@ -51,6 +52,12 @@ function M.setup_default(bufnr)
     '<leader>sv',
     presenterm.select_slide,
     { buffer = bufnr, desc = 'Select slide' }
+  )
+  vim.keymap.set(
+    'n',
+    '<leader>sh',
+    presenterm.toggle_hide_slide,
+    { buffer = bufnr, desc = 'Hide or show slide' }
   )
   vim.keymap.set(
     'n',

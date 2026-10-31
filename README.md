@@ -151,6 +151,7 @@ vim.keymap.set("n", "[s", ":Presenterm prev<cr>")
 - `<leader>sd` - Delete slide
 - `<leader>sy` - Yank slide
 - `<leader>sv` - Select slide
+- `<leader>sh` - Hide or show slide
 - `<leader>sk` / `<leader>sj` - Move slide up/down
 - `<leader>sR` - Reorder slides
 - `<leader>sl` - List slides
@@ -179,6 +180,7 @@ All commands use the `:Presenterm <command>` pattern for a clean namespace.
 - `:Presenterm delete` - Delete current slide
 - `:Presenterm yank` - Yank current slide
 - `:Presenterm select` - Visually select current slide
+- `:Presenterm hide` - Hide current slide with `<!-- skip_slide -->`, or show it again
 - `:Presenterm move-up` - Move slide up
 - `:Presenterm move-down` - Move slide down
 - `:Presenterm reorder` - Interactive slide reordering

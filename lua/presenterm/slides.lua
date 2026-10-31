@@ -28,6 +28,25 @@ local function is_slide_marker(line, slide_marker)
   return false
 end
 
+---Find the skip_slide directive in a line range, ignoring fenced code blocks
+---@param lines table Buffer lines
+---@param first_line number First line to search
+---@param last_line number Last line to search
+---@return number|nil Line number of the directive
+local function find_skip_directive(lines, first_line, last_line)
+  local in_fence = false
+
+  for i = first_line, last_line do
+    if lines[i]:match('^```') then
+      in_fence = not in_fence
+    elseif not in_fence and lines[i]:match('^%s*<!%-%-%s*skip_slide%s*%-%->%s*$') then
+      return i
+    end
+  end
+
+  return nil
+end
+
 ---Get frontmatter end line
 ---@return number Line number where frontmatter ends (0 if no frontmatter)
 function M.get_frontmatter_end()
@@ -82,6 +101,22 @@ function M.get_current_slide()
   end
 
   return #positions - 1, positions
+end
+
+---Get the slides presenterm shows, leaving out hidden ones
+---@return table Array of slide numbers
+function M.get_visible_slides()
+  local positions = M.get_slide_positions()
+  local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  local visible = {}
+
+  for i = 1, #positions - 1 do
+    if not find_skip_directive(lines, positions[i] + 1, positions[i + 1] - 1) then
+      table.insert(visible, i)
+    end
+  end
+
+  return visible
 end
 
 ---Check if file is a presentation
@@ -142,6 +177,25 @@ function M.split_slide()
 
   -- Move cursor to stay in the same relative position
   vim.fn.cursor(cursor_line + 3, 1)
+end
+
+---Hide current slide from presenterm, or show it again if already hidden
+function M.toggle_hide_slide()
+  local current, positions = M.get_current_slide()
+  local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  local first_line = positions[current] + 1
+  local last_line = positions[current + 1] - 1
+
+  local directive_line = find_skip_directive(lines, first_line, last_line)
+  if directive_line then
+    vim.api.nvim_buf_set_lines(0, directive_line - 1, directive_line, false, {})
+    vim.notify('Slide visible', vim.log.levels.INFO)
+    return
+  end
+
+  -- Goes below the content: moving or yanking the first slide drops lines above its header
+  vim.api.nvim_buf_set_lines(0, last_line, last_line, false, { '<!-- skip_slide -->' })
+  vim.notify('Slide hidden', vim.log.levels.INFO)
 end
 
 ---Delete current slide
