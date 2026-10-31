@@ -28,19 +28,15 @@ describe('presenterm', function()
   end)
 
   describe('hide command', function()
-    local saved_api, saved_presenterm, saved_keymap_set, saved_loaded
+    local saved_presenterm, saved_keymap_set, saved_loaded
 
     before_each(function()
-      saved_api = vim.tbl_extend('force', {}, vim.api)
       saved_presenterm = package.loaded['presenterm']
       saved_keymap_set = vim.keymap.set
       saved_loaded = vim.g.loaded_presenterm
     end)
 
     after_each(function()
-      for name, fn in pairs(saved_api) do
-        vim.api[name] = fn
-      end
       package.loaded['presenterm'] = saved_presenterm
       package.loaded['presenterm.keybindings'] = nil
       vim.keymap.set = saved_keymap_set
