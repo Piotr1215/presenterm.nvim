@@ -44,6 +44,10 @@ function M.select_slide()
   return require('presenterm.slides').select_slide()
 end
 
+function M.toggle_hide_slide()
+  return require('presenterm.slides').toggle_hide_slide()
+end
+
 function M.move_slide_up()
   return require('presenterm.slides').move_slide_up()
 end
@@ -141,6 +145,7 @@ function M.show_help()
     '  :Presenterm delete     - Delete current slide',
     '  :Presenterm yank       - Yank current slide',
     '  :Presenterm select     - Select current slide',
+    '  :Presenterm hide       - Hide or show current slide',
     '  :Presenterm move-up    - Move slide up',
     '  :Presenterm move-down  - Move slide down',
     '  :Presenterm reorder    - Interactive reordering',

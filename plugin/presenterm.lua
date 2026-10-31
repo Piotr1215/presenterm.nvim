@@ -62,6 +62,11 @@ local subcommand_tbl = {
       require('presenterm').select_slide()
     end,
   },
+  hide = {
+    impl = function(args, opts)
+      require('presenterm').toggle_hide_slide()
+    end,
+  },
   ['move-up'] = {
     impl = function(args, opts)
       require('presenterm').move_slide_up()

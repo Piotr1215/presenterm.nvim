@@ -430,5 +430,151 @@ describe('preview', function()
         assert.equals(not initial_enabled, new_state.enabled)
       end)
     end)
+
+    describe('with hidden slides', function()
+      local source_buf, terminal_buf = 1, 2
+      local on_cursor_moved, on_terminal_lines
+      local current_slide, visible_slides, source_lines, terminal_lines
+      local jumps, visited, in_source_buf, gone_buf
+      local saved_api, saved_schedule
+
+      before_each(function()
+        saved_api = vim.tbl_extend('force', {}, vim.api)
+        saved_schedule = vim.schedule
+
+        current_slide, visible_slides = 1, { 1, 2, 3 }
+        source_lines, terminal_lines = { '# One' }, { '' }
+        jumps, visited = {}, {}
+        in_source_buf, gone_buf = false, nil
+
+        vim.g.presenterm = {
+          preview = { command = 'presenterm', presentation_preview_sync = true },
+        }
+        vim.bo = setmetatable({}, {
+          __index = function()
+            return { channel = 7 }
+          end,
+          __newindex = function() end,
+        })
+
+        local slides_stub = package.loaded['presenterm.slides']
+        slides_stub.get_current_slide = function()
+          return current_slide, {}
+        end
+        slides_stub.get_visible_slides = function()
+          assert.is_true(in_source_buf)
+          return visible_slides
+        end
+        package.loaded['presenterm.navigation'] = {
+          go_to_slide = function(slide)
+            table.insert(visited, slide)
+          end,
+        }
+
+        local next_buf = 0
+        vim.api.nvim_get_current_buf = function()
+          next_buf = next_buf + 1
+          return next_buf
+        end
+        vim.api.nvim_buf_is_valid = function(buf)
+          return buf ~= gone_buf
+        end
+        vim.api.nvim_buf_get_lines = function(buf)
+          return buf == terminal_buf and terminal_lines or source_lines
+        end
+        vim.api.nvim_buf_attach = function(_, _, callbacks)
+          on_terminal_lines = callbacks.on_lines
+        end
+        vim.api.nvim_buf_call = function(buf, fn)
+          in_source_buf = buf == source_buf
+          local result = fn()
+          in_source_buf = false
+          return result
+        end
+        vim.api.nvim_chan_send = function(_, keys)
+          table.insert(jumps, tonumber(keys:match('^(%d+)G$')))
+        end
+        vim.api.nvim_create_autocmd = function(_, opts)
+          on_cursor_moved = opts.callback
+        end
+        vim.schedule = function(fn)
+          fn()
+        end
+
+        preview.preview()
+      end)
+
+      after_each(function()
+        package.loaded['presenterm.navigation'] = nil
+        vim.schedule = saved_schedule
+        for name, fn in pairs(saved_api) do
+          vim.api[name] = fn
+        end
+      end)
+
+      for _, case in ipairs({
+        { 'keep the number with nothing hidden', false, 2, { 1, 2, 3 }, { 2 } },
+        { 'discount hidden slides', false, 4, { 1, 3, 4 }, { 3 } },
+        { 'add the title slide after discounting', true, 3, { 1, 3 }, { 3 } },
+        { 'stay put on a hidden slide', false, 2, { 1, 3 }, {} },
+      }) do
+        local name, frontmatter, slide, visible, expected = unpack(case)
+
+        it('should ' .. name .. ' when the buffer moves', function()
+          source_lines = { frontmatter and '---' or '# One' }
+          current_slide, visible_slides = slide, visible
+
+          on_cursor_moved()
+
+          assert.same(expected, jumps)
+        end)
+      end
+
+      for _, case in ipairs({
+        { 'discount hidden slides', false, '3 / 3', { 1, 3, 4 }, 4 },
+        { 'subtract the title slide first', true, '3 / 3', { 1, 3 }, 3 },
+        { 'leave the title slide for go_to_slide to clamp', true, '1 / 3', { 2, 3 }, 0 },
+      }) do
+        local name, frontmatter, footer, visible, expected = unpack(case)
+
+        it('should ' .. name .. ' when the terminal moves', function()
+          source_lines = { frontmatter and '---' or '# One' }
+          terminal_lines, visible_slides = { footer }, visible
+
+          on_terminal_lines()
+
+          assert.same({ expected }, visited)
+        end)
+      end
+
+      it('should not bounce the buffer when the terminal echoes a jump', function()
+        current_slide, visible_slides = 4, { 1, 3, 4 }
+        on_cursor_moved()
+
+        terminal_lines = { '3 / 3' }
+        on_terminal_lines()
+
+        assert.same({}, visited)
+      end)
+
+      it('should not resend a jump after the terminal moved the buffer', function()
+        terminal_lines, visible_slides = { '3 / 3' }, { 1, 3, 4 }
+        on_terminal_lines()
+
+        current_slide = 4
+        on_cursor_moved()
+
+        assert.same({}, jumps)
+      end)
+
+      it('should stop syncing once the source buffer is gone', function()
+        terminal_lines, gone_buf = { '2 / 3' }, source_buf
+
+        on_terminal_lines()
+
+        assert.same({}, visited)
+        assert.is_false(preview.get_sync_state().enabled)
+      end)
+    end)
   end)
 end)
