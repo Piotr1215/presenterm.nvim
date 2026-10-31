@@ -42,14 +42,10 @@ Install presenterm: `cargo install presenterm` or see [presenterm installation d
 
 ### lazy.nvim
 
-> [!NOTE]
-> lazy.nvim [auto-detects rockspec files](https://lazy.folke.io/packages#rockspec) and will try to [build via luarocks](https://lazy.folke.io/developers#building) by default. Since this is a pure Lua plugin that doesn't require compilation, add `build = false` to skip the build step and avoid needing lua5.1/luajit.
-
 **Minimal setup (uses defaults):**
 ```lua
 {
   "Piotr1215/presenterm.nvim",
-  build = false,  -- Disable rockspec/luarocks build
   opts = {},  -- Uses all defaults, auto-detects picker
 }
 ```
@@ -58,7 +54,6 @@ Install presenterm: `cargo install presenterm` or see [presenterm installation d
 ```lua
 {
   "Piotr1215/presenterm.nvim",
-  build = false,
   dependencies = {
     -- Choose one (or install separately):
     "nvim-telescope/telescope.nvim",  -- Option 1: Telescope
@@ -73,7 +68,6 @@ Install presenterm: `cargo install presenterm` or see [presenterm installation d
 ```lua
 {
   "Piotr1215/presenterm.nvim",
-  build = false,
   config = function()
     require("presenterm").setup({
       default_keybindings = true,
